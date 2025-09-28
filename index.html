@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTun</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: #000;
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* LOGIN */
+    #login {
+      background: rgba(15,15,15,0.9);
+      border: 1px solid red;
+      box-shadow: 0 0 30px rgba(255,0,0,0.6);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      z-index: 2;
+      animation: fadeIn 0.6s ease;
+    }
+    #login h1 { color: #ff2e2e; margin-bottom: 20px; }
+    #login input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border: 1px solid red;
+      background: #111;
+      color: white;
+      outline: none;
+      text-align: center;
+      transition: .3s;
+    }
+    #login input:focus { box-shadow: 0 0 12px red; }
+    #login button {
+      padding: 12px 20px;
+      border: 1px solid red;
+      border-radius: 10px;
+      background: #200;
+      color: #fff;
+      cursor: pointer;
+      transition: .3s;
+      font-weight: bold;
+      width: 100%;
+    }
+    #login button:hover {
+      background: #400;
+      box-shadow: 0 0 20px red;
+    }
+    #error {
+      color:#ff2e2e;
+      margin:5px 0;
+      display:none;
+    }
+    .shake { animation: shake 0.3s; }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* LOADING */
+    #loading {
+      display: none;
+      font-size: 1.2rem;
+      color: #ff2e2e;
+      text-shadow: 0 0 15px red;
+    }
+    .dot { animation: blink 1.2s infinite; }
+    .dot:nth-child(2){ animation-delay: .2s;}
+    .dot:nth-child(3){ animation-delay: .4s;}
+    @keyframes blink { 0%,80%,100%{opacity:0;} 40%{opacity:1;} }
+
+    /* MAIN APP */
+    #app { display: none; flex-direction: column; align-items: center; width:100%; }
+
+    /* MENU */
+    .menu {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 1200px;
+      background: rgba(15,15,15,0.9);
+      border: 1px solid red;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 25px rgba(255,0,0,0.5);
+    }
+    .menu .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid red;
+      box-shadow: 0 0 15px red;
+      margin-right: 20px;
+    }
+    .menu-item {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      color: #eee;
+      transition: .3s;
+      position: relative;
+    }
+    .menu-item.active {
+      color: #ff2e2e;
+      text-shadow: 0 0 10px red;
+    }
+    .menu-item.active::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 20%;
+      width: 60%; height: 2px;
+      background: red;
+      box-shadow: 0 0 8px red;
+    }
+
+    /* CHỮ CHẠY */
+    .marquee {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-bottom: 20px;
+    }
+    .marquee p {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 12s linear infinite;
+      color: #ff2e2e;
+      font-weight: bold;
+      text-shadow: 0 0 8px red, 0 0 16px red;
+      letter-spacing: 2px;
+    }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* TAB CONTENT */
+    .tab-content { display: none; width: 100%; max-width: 1200px; }
+    .tab-content.active { display: block; animation: fadeIn 0.6s ease; }
+    @keyframes fadeIn {
+      from {opacity:0; transform:translateY(15px);}
+      to {opacity:1; transform:translateY(0);}
+    }
+
+    /* PANEL CARD */
+    .panel { display: flex; flex-wrap: wrap; gap: 16px; }
+    .card {
+      flex: 1;
+      min-width: 250px;
+      background: rgba(20,20,20,0.85);
+      border: 1px solid red;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: inset 0 0 12px rgba(255,0,0,0.4), 0 0 20px rgba(255,0,0,0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: .3s;
+    }
+    .card:hover { transform: translateY(-2px) scale(1.02); }
+
+    /* SWITCH */
+    .switch { position: relative; display: inline-block; width: 55px; height: 26px; }
+    .switch input { display: none; }
+    .slider {
+      position: absolute; inset:0;
+      background: #111; border-radius: 30px;
+      border: 1px solid red;
+      cursor: pointer;
+      transition: .4s;
+    }
+    .slider:before {
+      content: ""; position: absolute;
+      width: 20px; height: 20px;
+      left: 3px; bottom: 2px;
+      border-radius: 50%;
+      background: #222;
+      transition: .4s;
+    }
+    input:checked + .slider { background:#300; }
+    input:checked + .slider:before {
+      transform: translateX(28px);
+      background:red; box-shadow: 0 0 10px red;
+    }
+
+    /* RANGE SLIDER */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 120px;
+      height: 6px;
+      background: #111;
+      border: 1px solid red;
+      border-radius: 5px;
+      outline: none;
+      box-shadow: inset 0 0 8px rgba(255,0,0,0.5);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      background: red; border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px red, 0 0 20px red;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 16px; height: 16px;
+      background: red; border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px red, 0 0 20px red;
+    }
+
+    /* CONTACT TAB */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap: 20px;
+    }
+    .contact-card {
+      background: rgba(20,20,20,0.85);
+      border: 1px solid red;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      transition: .3s;
+      box-shadow: inset 0 0 10px rgba(255,0,0,0.4);
+    }
+    .contact-card:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 0 25px rgba(255,0,0,0.7);
+    }
+    .contact-card i { font-size: 2.5rem; margin-bottom: 10px; color: red; }
+    .contact-card a { color: #fff; font-weight: bold; text-decoration: none; }
+    .contact-card a:hover { color: #ff2e2e; }
+
+    /* NOTIFICATION */
+    #notification {
+      position: fixed;
+      bottom: -100px; left:50%;
+      transform: translateX(-50%);
+      min-width: 280px;
+      background: #111;
+      border: 1px solid red;
+      color: #ff2e2e;
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,0,0,0.5);
+      transition: .4s;
+      z-index: 999;
+    }
+    #notification.show { bottom: 40px; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login">
+    <h1>Đăng Nhập DevTun</h1>
+    <input type="password" id="password" placeholder="Nhập mật khẩu...">
+    <p id="error">❌ Sai mật khẩu!</p>
+    <button onclick="login()">Đăng Nhập</button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading">Đang tải<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+
+  <!-- APP -->
+  <div id="app">
+
+    <!-- MENU -->
+    <div class="menu">
+      <img src="https://i.imgur.com/v4XLZBr.png" alt="Avatar" class="avatar"> 
+      <div class="menu-item active" data-tab="home"><i class='bx bx-home'></i></div>
+      <div class="menu-item" data-tab="control"><i class='bx bx-bot'></i></div>
+      <div class="menu-item" data-tab="aim"><i class='bx bx-target-lock'></i></div>
+      <div class="menu-item" data-tab="contact"><i class='bx bx-message-dots'></i></div>
+    </div>
+
+    <!-- CHỮ CHẠY -->
+    <div class="marquee"><p>👑 Bản Quyền : TunDev 👑</p></div>
+
+    <!-- HOME -->
+    <div class="tab-content active" id="home">
+      <h1 class="text-2xl text-red-500 mb-4" id="typing"></h1>
+      <p> Xin chào, chào mừng bạn đến với DevTun🇻🇳 </p>
+    </div>
+
+    <!-- CONTROL -->
+    <div class="tab-content" id="control">
+      <h2 class="text-xl text-red-500 mb-4">Control Panel</h2>
+      <div class="panel">
+        <div class="card"><span>Unlock Trợ Năng</span><label class="switch"><input type="checkbox" class="func"><span class="slider"></span></label></div>
+        <div class="card"><span>Nhẹ Tâm</span><input type="range" min="1" max="10" value="5"></div>
+        <div class="card"><span>Sensi Touch</span><input type="range" min="1" max="10" value="7"></div>
+        <div class="card"><span>Auto Heal</span><label class="switch"><input type="checkbox" class="func"><span class="slider"></span></label></div>
+      </div>
+    </div>
+
+    <!-- AIM -->
+    <div class="tab-content" id="aim">
+      <h2 class="text-xl text-red-500 mb-4">Aim Settings</h2>
+      <div class="panel">
+        <div class="card"><span>Bật Tâm Ảo</span><label class="switch"><input type="checkbox" class="func"><span class="slider"></span></label></div>
+        <div class="card"><span>Điều Khiển Nâng Cao</span><input type="range" min="1" max="10" value="3"></div>
+        <div class="card"><span>Chế Độ Headshot</span><label class="switch"><input type="checkbox" class="func"><span class="slider"></span></label></div>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="tab-content" id="contact">
+      <h2 class="text-xl text-red-500 mb-4">Liên hệ</h2>
+      <div class="contact-grid">
+        <div class="contact-card"><i class='bx bxl-zalo'></i><p><a href="https://zalo.me/0378099746" target="_blank">Zalo</a></p></div>
+        <div class="contact-card"><i class='bx bxl-facebook'></i><p><a href="https://www.facebook.com/share/17QMQZoHSY/?mibextid=wwXIfr" target="_blank">Facebook</a></p></div>
+        <div class="contact-card"><i class='bx bxl-tiktok'></i><p><a href="https://www.tiktok.com/@tunlacuaai" target="_blank">TikTok</a></p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION -->
+  <div id="notification">Chức năng đã được bật</div>
+
+  <!-- ÂM THANH -->
+  <audio id="sound-login" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="sound-on" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+  <audio id="sound-off" src="https://actions.google.com/sounds/v1/cartoon/wood_click.ogg"></audio>
+
+  <script>
+    const soundLogin = document.getElementById("sound-login");
+    const soundOn = document.getElementById("sound-on");
+    const soundOff = document.getElementById("sound-off");
+
+    // Typing effect
+    const text = "Hệ Thống được điều hành do : Dev Tun🏆";
+    let i = 0;
+    function startTyping() {
+      if (i < text.length) {
+        document.getElementById("typing").innerHTML += text.charAt(i);
+        i++;
+        setTimeout(startTyping, 60);
+      }
+    }
+
+    // Login
+    function login() {
+      const pw = document.getElementById('password');
+      const error = document.getElementById('error');
+      if (pw.value === "DevTun") {
+        error.style.display = "none";
+        document.getElementById('login').style.display = "none";
+        document.getElementById('loading').style.display = "block";
+        setTimeout(()=>{
+          document.getElementById('loading').style.display = "none";
+          document.getElementById('app').style.display = "flex";
+          startTyping();
+          soundLogin.play();
+        },1500);
+      } else {
+        error.style.display = "block";
+        pw.classList.add("shake");
+        setTimeout(()=>pw.classList.remove("shake"),300);
+      }
+    }
+
+    // Tab
+    const tabs = document.querySelectorAll('.menu-item');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab=>{
+      tab.addEventListener('click',()=>{
+        tabs.forEach(t=>t.classList.remove('active'));
+        contents.forEach(c=>c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Notification
+    const funcs = document.querySelectorAll('.func');
+    const notification = document.getElementById('notification');
+    funcs.forEach(f=>{
+      f.addEventListener('change',()=>{
+        if(f.checked){
+          soundOn.play();
+          notification.innerText = "✅ Đã bật chức năng!";
+        } else {
+          soundOff.play();
+          notification.innerText = "❌ Đã tắt chức năng";
+        }
+        notification.classList.add('show');
+        setTimeout(()=>notification.classList.remove('show'),2000);
+      });
+    });
+  </script>
+</body>
+</html>
