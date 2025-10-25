@@ -1,579 +1,774 @@
 <!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>FF-ish Lite — Web FPS</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>DevTun VIP — Controls & Chat</title>
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 <style>
-  html,body{height:100%;margin:0;overflow:hidden;background:#071027;color:#e6eef8;font-family:Inter,Segoe UI,Roboto,system-ui,-apple-system}
-  #ui{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:10px;pointer-events:none;z-index:75}
-  .left, .right {display:flex;gap:8px;align-items:center;pointer-events:auto}
-  #hud{background:rgba(3,6,12,0.55);padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);font-size:14px}
-  #centerMsg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:70;pointer-events:none}
-  .centerBox{background:rgba(4,6,12,0.85);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);text-align:center;pointer-events:auto;color:#e6eef8}
-  button{background:#0b1220;border:1px solid rgba(255,255,255,0.04);color:inherit;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-  #overlayMobile{position:fixed;right:12px;bottom:12px;display:none;z-index:80}
-  .bigBtn{width:84px;height:84px;border-radius:48px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:18px}
-  #touchAim{position:fixed;left:12px;bottom:12px;width:140px;height:140px;border-radius:12px;background:rgba(255,255,255,0.02);display:none;z-index:80}
-  #fpsCanvas{display:block;width:100vw;height:100vh}
-  @media (max-width:900px){
-    #overlayMobile{display:block}
-    #touchAim{display:block}
-    .centerBox{width:90%;max-width:420px}
+  /* Fonts + base */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Orbitron:wght@600&display=swap');
+  :root{
+    --bg:#050306;
+    --panel: rgba(16,16,16,0.75);
+    --accent:#ff2e2e;
+    --accent-2:#ff7b7b;
+    --glass: rgba(255,255,255,0.03);
+    --text:#e9eef6;
+    --neon-shadow: 0 0 22px rgba(255,46,46,0.16), inset 0 0 8px rgba(255,46,46,0.04);
   }
-  /* simple crosshair */
-  .crosshair {position:fixed;left:50%;top:50%;width:20px;height:20px;margin-left:-10px;margin-top:-10px;pointer-events:none;z-index:60}
-  .crosshair:before, .crosshair:after {content:'';position:absolute;background:rgba(255,255,255,0.9);border-radius:2px}
-  .crosshair:before {left:9px;top:0;width:2px;height:20px}
-  .crosshair:after {top:9px;left:0;height:2px;width:20px}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#07020a);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;-webkit-font-smoothing:antialiased}
+  .app{max-width:460px;height:100vh;margin:0 auto;position:relative;display:flex;flex-direction:column;overflow:hidden}
+  /* background particle canvas */
+  .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  canvas#particles{position:absolute;inset:0;mix-blend-mode:screen;opacity:0.85}
+
+  /* LOGIN */
+  .screen{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:18px}
+  .card-login{width:100%;padding:22px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,0,0,0.06);box-shadow:0 18px 60px rgba(255,0,0,0.04);backdrop-filter:blur(8px);text-align:center}
+  .logo{width:86px;height:86px;border-radius:16px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#111;font-family:Orbitron;font-weight:900;font-size:22px}
+  h1{margin:6px 0 6px;font-family:Orbitron;color:var(--accent);letter-spacing:0.6px}
+  p.lead{margin:0 0 8px;color:#ffbcbc;font-size:13px}
+  .input-row{display:flex;gap:10px;align-items:center}
+  input.input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text);outline:none}
+  button.btn{padding:12px 14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:#111;font-weight:700;cursor:pointer}
+  .status{margin-top:10px;font-size:13px;color:#ffb3c1;min-height:18px}
+  .muted{color:#bfb0b0;font-size:12px;margin-top:8px}
+
+  /* MAIN */
+  .main{display:none;position:relative;z-index:10;height:100%;display:flex;flex-direction:column;padding:10px;gap:8px}
+  .header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px}
+  .hdr-left{display:flex;align-items:center;gap:10px}
+  .hdr-badge{width:44px;height:44px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-weight:800;color:#111}
+  .title{font-family:Orbitron;color:var(--accent);font-weight:700}
+  .sub{font-size:12px;color:#bfbfbf}
+
+  .cards{display:flex;gap:8px;margin-top:6px}
+  .card{flex:1;padding:10px;border-radius:12px;background:var(--panel);border:1px solid rgba(255,255,255,0.02);box-shadow:var(--neon-shadow);font-size:13px}
+  .card strong{display:block;margin-top:6px;font-size:16px}
+
+  .content{flex:1;overflow:auto;padding:6px;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px}
+
+  /* neon control cards */
+  .neon-card{width:100%;border-radius:16px;padding:16px;background:linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.3));border:1px solid rgba(255,46,46,0.18);box-shadow:0 12px 40px rgba(255,46,46,0.06), inset 0 0 30px rgba(255,46,46,0.02);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .neon-card h4{margin:0;font-size:18px;font-family:Orbitron;color:#ffd6d6}
+  .neon-switch{width:56px;height:30px;border-radius:18px;background:#111;border:1px solid rgba(255,46,46,0.12);position:relative;cursor:pointer;display:inline-block}
+  .neon-switch .dot{position:absolute;top:50%;transform:translateY(-50%);left:6px;width:20px;height:20px;border-radius:50%;background:#222;border:1px solid rgba(255,255,255,0.04);transition:left .22s, background .22s}
+  .neon-switch.on{background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 6px 18px rgba(255,46,46,0.18)}
+  .neon-switch.on .dot{left:30px;background:#fff}
+
+  /* sliders */
+  .range { -webkit-appearance:none; appearance:none; width:180px; height:8px; background:#111;border-radius:999px;border:1px solid rgba(255,46,46,0.07); box-shadow: inset 0 0 10px rgba(255,46,46,0.03);}
+  .range::-webkit-slider-thumb{ -webkit-appearance:none; width:18px;height:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px rgba(255,46,46,0.5); border:3px solid rgba(0,0,0,0.4)}
+
+  /* draggable aim surface */
+  .aim-surface{height:160px;border-radius:14px;background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.2));border:1px solid rgba(255,46,46,0.06);position:relative;overflow:hidden}
+  .aim-cross{width:36px;height:36px;border-radius:50%;background:rgba(255,46,46,0.95);box-shadow:0 0 22px rgba(255,46,46,0.6);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;color:#111;font-weight:800;font-family:Orbitron;touch-action:none}
+
+  /* Chat */
+  .chatPanel{display:flex;flex-direction:column;height:100%}
+  .chatLog{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
+  .bubble{max-width:78%;padding:10px;border-radius:12px;font-size:14px;line-height:1.3;box-shadow:0 12px 30px rgba(0,0,0,0.6)}
+  .bubble.me{align-self:flex-end;background:linear-gradient(90deg,#16314a,#0b6a8a);color:#dff7ff}
+  .bubble.bot{align-self:flex-start;background:linear-gradient(90deg,#280101,#3b0c0c);color:#ffdede;border:1px solid rgba(255,46,46,0.06)}
+  .typing{font-size:12px;color:#d0a6a6}
+
+  .chatRow{display:flex;align-items:flex-end;gap:8px}
+  .chatInputRow{display:flex;gap:8px;padding:8px;border-top:1px solid rgba(255,255,255,0.02)}
+  .chatInput{flex:1;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);outline:none;color:var(--text)}
+  .btnPrimary{padding:10px 12px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:#111;font-weight:700;cursor:pointer}
+
+  /* logs */
+  .logPanel{max-height:220px;overflow:auto;padding:8px;background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.2));border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+
+  /* bottom tabbar */
+  .tabbar{height:68px;display:flex;gap:6px;align-items:center;justify-content:space-around;padding:8px;border-top:1px solid rgba(255,255,255,0.02);background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(255,255,255,0.01))}
+  .tabbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#bdbdbd;font-size:12px;cursor:pointer;padding:6px;border-radius:10px}
+  .tabbtn.active{color:var(--accent);text-shadow:0 0 8px var(--accent)}
+
+  /* helper */
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .mutedSmall{color:#b8a9a9;font-size:12px}
+  .hidden{display:none!important}
+  @media (max-width:420px){ .logo{width:72px;height:72px} }
 </style>
 </head>
 <body>
-  <canvas id="fpsCanvas"></canvas>
+  <div class="app" id="appRoot">
+    <div class="bg"><canvas id="particles"></canvas></div>
 
-  <div id="ui">
-    <div class="left">
-      <div id="hud">HP: <span id="hp">100</span> &nbsp;|&nbsp; Score: <span id="score">0</span> &nbsp;|&nbsp; Level: <span id="level">1</span></div>
+    <!-- LOGIN SCREEN -->
+    <div class="screen" id="loginScreen" aria-hidden="false">
+      <div class="card-login" id="loginCard">
+        <div class="logo">Tun</div>
+        <h1> DevTun Premium </h1>
+        <p class="lead">Nhập mật khẩu để mở chức năng VIP</p>
+
+        <div style="height:8px"></div>
+        <div class="input-row" style="align-items:center">
+          <input id="password" class="input" type="password" placeholder=" Vui long nhập KEY -  Mua KEY để sử dụng! "/>
+          <button id="btnLogin" class="btn">OK</button>
+        </div>
+        <div class="status" id="loginStatus">Chưa đăng nhập</div>
+        <div class="muted">Mật khẩu Miễn Phí: <strong>DevTun</strong> hoặc <strong>TunDevPro</strong></div>
+      </div>
     </div>
-    <div class="right">
-      <div id="highBox" style="background:rgba(255,255,255,0.03);padding:8px;border-radius:8px">High: <strong id="highscore">0</strong></div>
-      <div style="width:8px"></div>
-      <button id="btnStart">Bắt đầu</button>
-    </div>
-  </div>
 
-  <div class="crosshair"></div>
+    <!-- MAIN APP -->
+    <div class="main hidden" id="mainApp" aria-hidden="true">
+      <div class="header">
+        <div class="hdr-left">
+          <div class="hdr-badge">Tun</div>
+          <div>
+            <div class="title"> DevTun Premium </div>
+            <div class="sub" id="subStatus">Offline</div>
+          </div>
+        </div>
+        <div>
+          <button id="soundToggle" class="btn" title="Bật/Tắt âm">🔊</button>
+        </div>
+      </div>
 
-  <div id="overlayMobile">
-    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-      <div class="bigBtn" id="btnFire">BẮN</div>
-    </div>
-  </div>
+      <div class="cards">
+        <div class="card"><div class="mutedSmall">Hệ thống</div><strong id="sysStatus">OK</strong></div>
+        <div class="card"><div class="mutedSmall">Người dùng online</div><strong id="usersCount">—</strong></div>
+        <div class="card"><div class="mutedSmall">Phiên</div><strong id="sessionId">—</strong></div>
+      </div>
 
-  <div id="touchAim"></div>
+      <div class="content">
+        <!-- HOME -->
+        <div id="tabHome" class="view">
+          <div class="neon-card">
+            <div>
+              <h4>Chào mừng: DevTun Premium</h4>
+              <div class="mutedSmall">Hệ thống chạy mượt & An toàn & Bảo mật</div>
+            </div>
+            <div style="min-width:40px"></div>
+          </div>
+          <div class="neon-card">
+            <div>
+              <h4>Thông báo</h4>
+              <div class="mutedSmall">Bấm Chat để liên hệ Admin. Mua Key & STK có trong Chat Admin🏆
+Lưu ý : Về KEY Miễn phí sẽ hạn chế rất nhiều về Chức Năng và Cần Jailbreak 🇻🇳</div>
+            </div>
+            <div></div>
+          </div>
+        </div>
 
-  <div id="centerMsg">
-    <div class="centerBox" id="centerBox">
-      <h2 id="title">FF-ish Lite</h2>
-      <p style="color:#9fb0c8">Phiên bản web 3D FPS nhẹ — xoay ngang (landscape) để chơi tốt nhất. Có âm thanh súng & hiệu ứng.</p>
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
-        <button id="btnStart2">Bắt đầu</button>
-        <button id="btnHow">Hướng dẫn</button>
+        <!-- CONTROL -->
+        <div id="tabControl" class="view hidden">
+          <div class="neon-card row">
+            <div><h4>Unlock Iphone Untra</h4><div class="mutedSmall">Bật/tắt trợ năng</div></div>
+            <div id="toggleAssist" class="neon-switch" role="switch" aria-checked="false"><div class="dot"></div></div>
+          </div>
+
+          <div class="neon-card row">
+            <div><h4>Nhẹ Tâm</h4><div class="mutedSmall">Giảm rung, ổn định</div></div>
+            <div><input id="rangeGentle" class="range" type="range" min="1" max="10" value="5"></div>
+          </div>
+
+          <div class="neon-card row">
+            <div><h4>Sensi Touch</h4><div class="mutedSmall">Độ nhạy cảm ứng</div></div>
+            <div><input id="rangeSensi" class="range" type="range" min="1" max="10" value="7"></div>
+          </div>
+
+          <div class="neon-card row">
+            <div><h4>Smooth For Head</h4><div class="mutedSmall">Tăng tốc cảm ứng vùng đầu</div></div>
+            <div id="toggleHeal" class="neon-switch" role="switch" aria-checked="false"><div class="dot"></div></div>
+          </div>
+
+          <!-- Advanced aim controls -->
+          <div style="height:8px"></div>
+          <div class="neon-card" style="flex-direction:column;align-items:flex-start">
+            <h4>Aim Assistant</h4>
+            <div style="height:8px"></div>
+            <div class="row" style="width:100%">
+              <div>
+                <div class="mutedSmall">Aim Smooth</div>
+                <input id="aimSmooth" class="range" type="range" min="0" max="100" value="40">
+              </div>
+              <div>
+                <div class="mutedSmall">Aim Speed</div>
+                <input id="aimSpeed" class="range" type="range" min="1" max="30" value="12">
+              </div>
+            </div>
+            <div style="height:8px"></div>
+            <div class="row" style="width:100%">
+              <div>
+                <div class="mutedSmall">Recoil Control</div>
+                <input id="recoil" class="range" type="range" min="0" max="100" value="50">
+              </div>
+              <div>
+                <div class="mutedSmall">Headshot Mode</div>
+                <div id="toggleHead" class="neon-switch" role="switch" aria-checked="false"><div class="dot"></div></div>
+              </div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="mutedSmall">Kéo tâm (kéo điểm đỏ trong ô bên dưới)</div>
+            <div style="height:8px"></div>
+            <div class="aim-surface" id="aimSurface">
+              <div class="aim-cross" id="aimCross" role="application">✦</div>
+            </div>
+            <div style="height:10px"></div>
+            <div class="row" style="width:100%">
+              <div class="mutedSmall">Khoá vị trí tâm</div>
+              <div id="lockAim" class="neon-switch" role="switch" aria-checked="false"><div class="dot"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHAT -->
+        <div id="tabChat" class="view hidden">
+          <div class="chatPanel" style="height:100%">
+            <div class="chatLog" id="chatLog" aria-live="polite"></div>
+            <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+              <input id="chatInput" class="chatInput" placeholder="Nhắn Admin... (gõ STK, Xin chào, Mua Key)" />
+              <button id="chatSend" class="btnPrimary">Gửi</button>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button id="btnMuaKey" class="btnPrimary">Mua Key</button>
+              <button id="btnSTK" class="btnPrimary" style="background:#333;color:#fff">Hiện STK</button>
+            </div>
+            <div style="height:8px"></div>
+            <div class="neon-card" style="flex-direction:column;align-items:flex-start">
+              <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+                <div><strong>Lịch sử Chat</strong><div class="mutedSmall">Lưu trong local nếu bật Save Chat</div></div>
+                <div style="display:flex;gap:6px">
+                  <button id="clearChat" class="btn" style="background:#222;color:#fff">Xóa</button>
+                </div>
+              </div>
+              <div id="chatCount" class="mutedSmall" style="margin-top:8px">Tin nhắn: 0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="tabSetting" class="view hidden">
+          <div class="neon-card">
+            <div>
+              <h4>Tùy chọn nâng cao</h4>
+              <div class="mutedSmall">Điều chỉnh theme, lưu chat, particles</div>
+            </div>
+            <div></div>
+          </div>
+
+          <div class="neon-card row">
+            <div><strong>Lưu chat</strong><div class="mutedSmall">Lưu tin nhắn khi bật</div></div>
+            <div><input id="saveChat" type="checkbox" checked></div>
+          </div>
+
+          <div class="neon-card row">
+            <div><strong>Hiệu ứng nền</strong><div class="mutedSmall">Particles động</div></div>
+            <div><input id="toggleParticles" type="checkbox" checked></div>
+          </div>
+
+          <div class="neon-card">
+            <div style="display:flex;gap:8px">
+              <button class="btn" data-theme="red">Đỏ</button>
+              <button class="btn" data-theme="purple">Tím</button>
+              <button class="btn" data-theme="pink">Hồng</button>
+            </div>
+            <div style="height:10px"></div>
+            <div style="display:flex;gap:8px">
+              <button id="exportLogs" class="btn" style="background:#111;color:#fff">Xuất Log</button>
+              <button id="clearLogs" class="btn" style="background:#111;color:#fff">Xóa Log</button>
+            </div>
+          </div>
+
+          <div class="neon-card">
+            <h4>Lịch sử Log</h4>
+            <div class="logPanel" id="logPanel"></div>
+          </div>
+        </div>
+
+        <!-- INFO -->
+        <div id="tabInfo" class="view hidden">
+          <div class="neon-card">
+            <div>
+              <h4>Thiết bị</h4>
+              <div id="deviceUA" class="mutedSmall" style="margin-top:6px">—</div>
+            </div>
+            <div></div>
+          </div>
+
+          <div class="neon-card row">
+            <div><div class="mutedSmall">Device Score</div><strong id="deviceScore">—</strong></div>
+            <div><div class="mutedSmall">Latency</div><strong id="deviceLatency">—</strong></div>
+          </div>
+
+          <div class="neon-card">
+            <div><div class="mutedSmall">Hardware Tier</div><strong id="deviceTier">—</strong></div>
+          </div>
+
+          <div style="height:8px"></div>
+          <a class="contactBtn" id="linkZalo" href="https://zalo.me/0378099746" target="_blank"><i class='bx bxl-zoom'></i> Zalo</a>
+          <a class="contactBtn" id="linkFB" href="https://www.facebook.com/share/17QMQZoHSY/?mibextid=wwXIfr" target="_blank"><i class='bx bxl-facebook'></i> Facebook</a>
+          <a class="contactBtn" id="linkTT" href="https://www.tiktok.com/@tunlacuaai" target="_blank"><i class='bx bxl-tiktok'></i> TikTok</a>
+        </div>
+
+      </div>
+
+      <!-- Tabbar -->
+      <div class="tabbar">
+        <div class="tabbtn active" data-tab="tabHome"><i class='bx bx-home'></i><div>Home</div></div>
+        <div class="tabbtn" data-tab="tabControl"><i class='bx bx-bot'></i><div>Control</div></div>
+        <div class="tabbtn" data-tab="tabChat"><i class='bx bx-chat'></i><div>Chat</div></div>
+        <div class="tabbtn" data-tab="tabSetting"><i class='bx bx-slider'></i><div>Setting</div></div>
+        <div class="tabbtn" data-tab="tabInfo"><i class='bx bx-info-circle'></i><div>Info</div></div>
       </div>
     </div>
   </div>
 
-<script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.154.0/examples/js/controls/PointerLockControls.js"></script>
+  <!-- sounds -->
+  <audio id="sndClick" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+  <audio id="sndSuccess" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="sndError" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+  <audio id="sndMsg" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" preload="auto"></audio>
 
 <script>
-/*
-  FF-ish Lite
-  - three.js based lightweight FPS
-  - WebAudio-generated sounds (no external files)
-*/
-(() => {
-  // --- Basic scene setup ---
-  const canvas = document.getElementById('fpsCanvas');
-  const renderer = new THREE.WebGLRenderer({canvas, antialias: true});
-  renderer.setPixelRatio(window.devicePixelRatio || 1);
-  renderer.shadowMap.enabled = true;
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x0b1730, 0.0025);
+/* =========================
+   Utils & State
+   ========================= */
+const $ = id => document.getElementById(id);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const play = id => { if(!SOUND) return; const a = $(id); if(a){ try{ a.currentTime=0; a.play(); } catch(e){} } };
+const now = () => (new Date()).toLocaleString();
+let SOUND = true;
+const App = { logged:false, session:null, users:0, chat:[], logs:[], aimPos: {x:0.5,y:0.5}, lockAim:false };
 
-  const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 2000);
-  camera.position.set(0,1.6,0);
-
-  const controls = new THREE.PointerLockControls(camera, canvas);
-
-  // lighting
-  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-  dir.position.set(100,150,50);
-  dir.castShadow = true;
-  dir.shadow.mapSize.set(1024,1024);
-  scene.add(dir);
-  const amb = new THREE.AmbientLight(0xffffff, 0.25);
-  scene.add(amb);
-
-  // ground
-  const groundMat = new THREE.MeshStandardMaterial({color:0x1b3b2f, roughness:1, metalness:0});
-  const groundGeo = new THREE.PlaneGeometry(4000,4000);
-  const ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI/2;
-  ground.receiveShadow = true;
-  scene.add(ground);
-
-  // simple environment objects (boxes / crates) for cover
-  const crates = new THREE.Group();
-  const boxGeo = new THREE.BoxGeometry(6,6,6);
-  const boxMat = new THREE.MeshStandardMaterial({color:0x6b4b3a});
-  for(let i=0;i<75;i++){
-    const m = new THREE.Mesh(boxGeo, boxMat);
-    m.position.set((Math.random()-0.5)*800,3,(Math.random()-0.5)*800);
-    m.rotation.y = Math.random()*Math.PI*2;
-    m.castShadow = true;
-    m.receiveShadow = true;
-    crates.add(m);
+/* Helpers */
+function logEvent(text){
+  const entry = {t: Date.now(), text};
+  App.logs.unshift(entry); // newest first
+  renderLogs();
+  // save logs
+  try{ localStorage.setItem('devtun_logs', JSON.stringify(App.logs)); }catch(e){}
+}
+function renderLogs(){
+  const panel = $('logPanel');
+  if(!panel) return;
+  panel.innerHTML = App.logs.slice(0,200).map(l=> `<div style="padding:6px;border-bottom:1px dashed rgba(255,255,255,0.02);font-size:12px;"><strong style="color:var(--accent)">${new Date(l.t).toLocaleString()}</strong><div style="margin-top:4px;color:#cfc0c0">${l.text}</div></div>`).join('');
+}
+function pushChat(author,text){
+  App.chat.push({author,text,t:Date.now()});
+  renderChat();
+  if($('saveChat') && $('saveChat').checked) localStorage.setItem('devtun_chat_'+App.session, JSON.stringify(App.chat));
+  $('chatCount').textContent = `Tin nhắn: ${App.chat.length}`;
+}
+function renderChat(){
+  const box = $('chatLog');
+  box.innerHTML = '';
+  for(const m of App.chat){
+    const div = document.createElement('div');
+    div.className = 'bubble ' + (m.author==='me'?'me':'bot');
+    div.textContent = m.text;
+    const row = document.createElement('div'); row.className='chatRow';
+    row.style.justifyContent = (m.author==='me')? 'flex-end':'flex-start';
+    row.appendChild(div);
+    box.appendChild(row);
   }
-  scene.add(crates);
+  box.scrollTop = box.scrollHeight;
+}
 
-  // simple sky (large sphere)
-  const skyGeo = new THREE.SphereGeometry(1200, 16, 16);
-  const skyMat = new THREE.MeshBasicMaterial({color:0x07203b, side: THREE.BackSide});
-  scene.add(new THREE.Mesh(skyGeo, skyMat));
+/* =========================
+   Particles background
+   ========================= */
+const canvas = $('particles');
+if(canvas && canvas.getContext){
+  const ctx = canvas.getContext('2d');
+  let W = innerWidth, H = innerHeight;
+  canvas.width = W; canvas.height = H;
+  const P = Array.from({length:110}).map(()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+0.4,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,h:180+Math.random()*160}));
+  window.addEventListener('resize', ()=>{W=innerWidth;H=innerHeight;canvas.width=W;canvas.height=H});
+  (function anim(){ ctx.clearRect(0,0,W,H); for(const p of P){ p.x+=p.vx; p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0; const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*12); g.addColorStop(0, `hsla(${p.h},100%,60%,0.12)`); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*8,0,Math.PI*2); ctx.fill(); } requestAnimationFrame(anim); })();
+}
 
-  // player state
-  const player = {vel: new THREE.Vector3(), speed: 8.0, hp: 100, score:0, level:1, position: new THREE.Vector3()};
-  document.getElementById('hp').textContent = player.hp;
-  document.getElementById('score').textContent = player.score;
+/* =========================
+   Login flow
+   ========================= */
+$('btnLogin').addEventListener('click', tryLogin);
+$('password').addEventListener('keyup', e=>{ if(e.key==='Enter') tryLogin(); });
+$('soundToggle').addEventListener('click', ()=>{ SOUND = !SOUND; $('soundToggle').textContent = SOUND ? '🔊':'🔇'; play('sndClick'); });
 
-  // enemies
-  const enemies = [];
-
-  // bullet tracer objects (visual)
-  const tracers = [];
-
-  // clock
-  const clock = new THREE.Clock();
-
-  // resizing
-  function resize(){
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+function tryLogin(){
+  play('sndClick');
+  const val = $('password').value.trim();
+  if(!val){ $('loginStatus').textContent = 'Bạn chưa nhập mật khẩu'; play('sndError'); return; }
+  if(val === 'DevTun' || val === 'TunDevPro'){
+    $('loginStatus').textContent = 'Đăng nhập thành công';
+    play('sndSuccess');
+    App.logged = true;
+    App.session = Math.random().toString(36).slice(2,10);
+    App.users = Math.floor(Math.random()*100)+1;
+    logEvent('Đăng nhập thành công (session='+App.session+')');
+    // animate hide login
+    const L = $('loginScreen'); L.style.transition = 'transform .45s, opacity .45s'; L.style.transform='scale(.98)'; L.style.opacity='0';
+    setTimeout(()=> L.style.display='none',450);
+    setTimeout(()=> {
+      $('mainApp').classList.remove('hidden'); $('mainApp').style.display='flex'; $('mainApp').removeAttribute('aria-hidden');
+      $('usersCount').textContent = App.users; $('sessionId').textContent = App.session; $('subStatus').textContent='Đã đăng nhập';
+      $('sysStatus').textContent='Online';
+      // load settings/chat/logs
+      loadSettings(); loadSavedChat(); loadLogs();
+      // device info
+      setTimeout(loadDeviceInfo,300);
+      setTimeout(()=> adminAutoGreet(), 700);
+    },520);
+  } else {
+    $('loginStatus').textContent = 'Sai mật khẩu';
+    play('sndError');
+    // shake effect
+    const card = $('loginCard');
+    card.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:300});
+    logEvent('Đăng nhập thất bại: ' + val);
   }
-  window.addEventListener('resize', resize); resize();
+}
 
-  // movement controls (WASD + touch joystick simplified)
-  const keys = {};
-  window.addEventListener('keydown', e => {
-    keys[e.key.toLowerCase()] = true;
-    if (e.key === ' '){ e.preventDefault(); tryShoot(); }
+/* =========================
+   Tabs
+   ========================= */
+$$('.tabbtn').forEach(tb => tb.addEventListener('click', e=>{
+  play('sndClick');
+  $$('.tabbtn').forEach(x=>x.classList.remove('active'));
+  tb.classList.add('active');
+  const target = tb.dataset.tab;
+  $$('.view').forEach(v=> v.classList.add('hidden'));
+  $(target).classList.remove('hidden');
+  if(target === 'tabChat') setTimeout(()=> $('chatInput').focus(),200);
+}));
+
+/* =========================
+   Log functions
+   ========================= */
+$('exportLogs').addEventListener('click', ()=> {
+  if(!App.logs.length){ alert('Không có log để xuất'); return; }
+  const text = App.logs.map(l=> `${new Date(l.t).toLocaleString()} - ${l.text}`).join('\n');
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `devtun_logs_${Date.now()}.txt`; a.click(); URL.revokeObjectURL(url);
+  play('sndClick');
+});
+$('clearLogs').addEventListener('click', ()=> {
+  if(!confirm('Xóa toàn bộ log?')) return;
+  App.logs = []; renderLogs(); localStorage.removeItem('devtun_logs'); play('sndClick'); logEvent('Đã xóa log (user)');
+});
+
+/* log rendering/ load */
+function loadLogs(){
+  try{
+    const raw = localStorage.getItem('devtun_logs');
+    if(raw) App.logs = JSON.parse(raw);
+  }catch(e){ App.logs = []; }
+  renderLogs();
+}
+
+/* =========================
+   Settings: switch UI + store
+   ========================= */
+function initSwitch(id, onChange){
+  const el = $(id);
+  const dot = el.querySelector('.dot');
+  el.addEventListener('click', ()=>{
+    const on = !el.classList.contains('on');
+    if(on){ el.classList.add('on'); el.setAttribute('aria-checked','true'); } else { el.classList.remove('on'); el.setAttribute('aria-checked','false'); }
+    play('sndClick'); logEvent(`${id} => ${on}`);
+    if(onChange) onChange(on);
   });
-  window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
-
-  // touch controls: touch aim area + fire button
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 900;
-  if (isMobile) {
-    document.getElementById('overlayMobile').style.display = 'block';
-    document.getElementById('touchAim').style.display = 'block';
-  }
-
-  // pointer lock start
-  const centerMsg = document.getElementById('centerMsg');
-  const btnStart = document.getElementById('btnStart');
-  const btnStart2 = document.getElementById('btnStart2');
-  function startGame(){
-    // request pointer lock for desktop
-    if (!isMobile) {
-      controls.lock();
-    }
-    centerMsg.style.display = 'none';
-    lastShot = 0;
-    spawnTimer = 0;
-    player.hp = 100; player.score = 0; player.level = 1;
-    document.getElementById('hp').textContent = player.hp;
-    document.getElementById('score').textContent = player.score;
-    document.getElementById('level').textContent = player.level;
-    // place player at center
-    controls.getObject().position.set(0,1.6,0);
-    camera.position.set(0,1.6,0);
-    animate();
-  }
-  btnStart.addEventListener('click', startGame);
-  btnStart2.addEventListener('click', startGame);
-
-  // show how
-  document.getElementById('btnHow').addEventListener('click', () => {
-    alert('WASD hoặc chạm joystick để di chuyển, chuột để nhìn, click/space để bắn. Trên mobile dùng nút BẮN. Xoay ngang màn hình để chơi tốt hơn.');
+}
+// init custom neon switches
+['toggleAssist','toggleHeal','toggleHead','lockAim'].forEach(id=>{
+  const el = $(id);
+  if(el) el.addEventListener('click', ()=> {
+    const on = !el.classList.contains('on');
+    if(on) el.classList.add('on'); else el.classList.remove('on');
+    play('sndClick'); logEvent(`${id} set to ${on}`);
+    if(id === 'lockAim'){ App.lockAim = on; localStorage.setItem('devtun_aim_lock', JSON.stringify(on)); }
   });
+});
 
-  // --- WebAudio: generate gunshot / hit / explosion sounds dynamically ---
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-  function playGunshot(){
-    const now = audioCtx.currentTime;
-    // short noise burst + pitch sweep
-    const bufferSize = audioCtx.sampleRate * 0.12;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++){
-      const n = (Math.random()*2-1) * Math.exp(-i/bufferSize*6);
-      data[i] = n * (Math.random()*0.6 + 0.4);
-    }
-    const src = audioCtx.createBufferSource(); src.buffer = buffer;
-    const gain = audioCtx.createGain(); gain.gain.value = 0.6;
-    const bp = audioCtx.createBiquadFilter(); bp.type = 'highpass'; bp.frequency.value = 800;
-    src.connect(bp); bp.connect(gain); gain.connect(audioCtx.destination);
-    src.start(now);
-    // short transient click
-    const osc = audioCtx.createOscillator(); osc.type='sawtooth'; osc.frequency.setValueAtTime(800, now);
-    const g2 = audioCtx.createGain(); g2.gain.setValueAtTime(0.12, now); g2.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-    osc.connect(g2); g2.connect(audioCtx.destination);
-    osc.start(now); osc.stop(now + 0.09);
-  }
-
-  function playHit(){
-    const now = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator(); osc.type='triangle'; osc.frequency.setValueAtTime(220, now);
-    const g = audioCtx.createGain(); g.gain.setValueAtTime(0.18, now); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-    osc.connect(g); g.connect(audioCtx.destination);
-    osc.start(now); osc.stop(now + 0.18);
-  }
-
-  function playExplosion(){
-    const now = audioCtx.currentTime;
-    // long noise
-    const bufSize = audioCtx.sampleRate * 0.6;
-    const buffer = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
-    const d = buffer.getChannelData(0);
-    for(let i=0;i<bufSize;i++){
-      d[i] = (Math.random()*2-1) * Math.exp(-i/bufSize*1.5);
-    }
-    const src = audioCtx.createBufferSource(); src.buffer = buffer;
-    const g = audioCtx.createGain(); g.gain.value = 0.9;
-    const lf = audioCtx.createBiquadFilter(); lf.type='lowpass'; lf.frequency.value = 1000;
-    src.connect(lf); lf.connect(g); g.connect(audioCtx.destination);
-    src.start(now);
-  }
-
-  // --- Shooting / Raycasting ---
-  const raycaster = new THREE.Raycaster();
-  let lastShot = 0;
-  const fireRate = 160; // ms between shots
-
-  function tryShoot(){
-    const now = performance.now();
-    if (now - lastShot < fireRate) return;
-    lastShot = now;
-    // audio
-    try{ audioCtx.resume().then(()=>playGunshot()); }catch(e){}
-    // muzzle flash small camera kick
-    recoil = Math.min(1.2, recoil + 0.6);
-
-    // ray from camera center
-    raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
-    const hits = raycaster.intersectObjects(enemies.map(e=>e.mesh), false);
-    // visual tracer
-    const origin = camera.position.clone();
-    const dir = new THREE.Vector3(); raycaster.ray.direction.clone(dir);
-    const tracerEnd = origin.clone().add(dir.clone().multiplyScalar(1200));
-    addTracer(origin, tracerEnd);
-
-    if (hits.length > 0){
-      const hit = hits[0];
-      // find enemy object
-      const em = enemies.find(en => en.mesh === hit.object);
-      if (em){
-        em.hp -= 35; // damage
-        playHit();
-        spawnHitParticle(hit.point);
-        if (em.hp <= 0){
-          killEnemy(em);
-        }
-      }
-    }
-  }
-
-  // bind mouse click / touch fire
-  window.addEventListener('mousedown', (e) => { tryShoot(); });
-  document.getElementById('btnFire').addEventListener('touchstart', (e) => { e.preventDefault(); tryShoot(); }, {passive:false});
-  document.getElementById('btnFire').addEventListener('mousedown', (e) => { tryShoot(); });
-
-  // touch aim: move camera orientation by touch dragging on left area
-  let touching = false, lastTouch = null;
-  const touchAim = document.getElementById('touchAim');
-  touchAim.addEventListener('touchstart', (e) => { touching = true; lastTouch = e.touches[0]; }, {passive:false});
-  touchAim.addEventListener('touchmove', (e) => {
-    if (!touching) return;
-    const t = e.touches[0];
-    const dx = (t.clientX - lastTouch.clientX) * 0.0025;
-    const dy = (t.clientY - lastTouch.clientY) * 0.0025;
-    controls.getObject().rotation.y -= dx;
-    camera.rotation.x = clamp(camera.rotation.x - dy, -Math.PI/2 + 0.1, Math.PI/2 - 0.1);
-    lastTouch = t;
-  }, {passive:false});
-  touchAim.addEventListener('touchend', (e) => { touching = false; lastTouch = null; }, {passive:false});
-
-  // helper clamp
-  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-
-  // tracer visual
-  function addTracer(start, end){
-    const geo = new THREE.BufferGeometry().setFromPoints([start, end]);
-    const mat = new THREE.LineBasicMaterial({color:0xffe59e, transparent:true, opacity:0.95});
-    const line = new THREE.Line(geo, mat);
-    line.frustumCulled = false;
-    scene.add(line);
-    tracers.push({line, life:0.08});
-  }
-
-  // hit particles
-  const particles = [];
-  function spawnHitParticle(pos){
-    playHit();
-    for (let i=0;i<12;i++){
-      const v = new THREE.Vector3((Math.random()-0.5)*7, (Math.random()-0.2)*6, (Math.random()-0.5)*7);
-      particles.push({pos: pos.clone(), vel: v, life: 0.6});
-    }
-  }
-
-  // kill enemy
-  function killEnemy(em){
-    player.score += 10 + Math.floor(Math.random()*6) + player.level*2;
-    // explosion audio + effect
-    playExplosion();
-    spawnHitParticle(em.mesh.position);
-    scene.remove(em.mesh);
-    const idx = enemies.indexOf(em); if (idx>=0) enemies.splice(idx,1);
-    updateHUD();
-  }
-
-  // --- Enemy spawn & behavior ---
-  let spawnTimer = 0;
-  let spawnInterval = 2000; // ms
-  function spawnEnemy(){
-    const radius = 250 + Math.random()*250;
-    const ang = Math.random()*Math.PI*2;
-    const x = Math.cos(ang)*radius;
-    const z = Math.sin(ang)*radius;
-    const geo = new THREE.SphereGeometry(2.2 + Math.random()*2.8, 8, 8);
-    const mat = new THREE.MeshStandardMaterial({color:0xff6b6b});
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(x,1.4,z);
-    mesh.castShadow = true;
-    scene.add(mesh);
-    enemies.push({mesh, hp: 80 + Math.floor(Math.random()*60), speed: (1.0 + Math.random()*0.6) + player.level*0.12});
-  }
-
-  // enemy AI move toward player
-  function updateEnemies(dt){
-    for (const e of enemies){
-      const pos = e.mesh.position;
-      const dir = new THREE.Vector3().subVectors(controls.getObject().position, pos);
-      const dist = dir.length();
-      dir.normalize();
-      // move closer
-      if (dist > 3.2){
-        pos.add(dir.multiplyScalar(e.speed * dt));
-      } else {
-        // melee hit
-        if (!e.lastHit || performance.now() - e.lastHit > 800){
-          e.lastHit = performance.now();
-          player.hp -= 8;
-          flash = 0.16;
-          document.getElementById('hp').textContent = player.hp;
-          if (player.hp <= 0) gameOver();
-        }
-      }
-      // face player
-      e.mesh.lookAt(controls.getObject().position.x, e.mesh.position.y, controls.getObject().position.z);
-    }
-  }
-
-  // HUD update
-  function updateHUD(){
-    document.getElementById('score').textContent = player.score;
-    document.getElementById('level').textContent = player.level;
-    const hs = Number(localStorage.getItem('ffish_hs') || 0);
-    document.getElementById('highscore').textContent = hs;
-  }
-
-  // particles render
-  function updateParticles(dt){
-    for (let i=particles.length-1;i>=0;i--){
-      const p = particles[i];
-      p.life -= dt;
-      p.vel.y -= 9.8 * dt * 0.9;
-      p.pos.add(p.vel.clone().multiplyScalar(dt));
-      if (p.life <= 0) particles.splice(i,1);
-    }
-  }
-
-  // simple particle renderer using small planes
-  const particleGroup = new THREE.Group(); scene.add(particleGroup);
-  function renderParticles(){
-    // clear group
-    while(particleGroup.children.length) particleGroup.remove(particleGroup.children[0]);
-    for (const p of particles){
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(0.35,0.35), new THREE.MeshBasicMaterial({color:0xffc9a3,transparent:true,opacity: Math.max(0, p.life/0.6)}));
-      m.position.copy(p.pos);
-      m.lookAt(camera.position);
-      particleGroup.add(m);
-    }
-  }
-
-  // tracers update
-  function updateTracers(dt){
-    for (let i=tracers.length-1;i>=0;i--){
-      tracers[i].life -= dt;
-      tracers[i].line.material.opacity = tracers[i].life / 0.08;
-      if (tracers[i].life <= 0){
-        scene.remove(tracers[i].line);
-        tracers.splice(i,1);
-      }
-    }
-  }
-
-  // recoil effect (simple camera pitch offset)
-  let recoil = 0;
-  let flash = 0;
-
-  // animate loop
-  let running = false;
-  function animate(){
-    if (running) return; running = true;
-    let last = performance.now();
-    function frame(){
-      const now = performance.now();
-      const dt = Math.min(50, now - last) / 1000;
-      last = now;
-
-      // movement - WASD
-      const forward = (keys['w'] || keys['arrowup']) ? 1 : (keys['s'] || keys['arrowdown']) ? -1 : 0;
-      const right = (keys['d'] || keys['arrowright']) ? 1 : (keys['a'] || keys['arrowleft']) ? -1 : 0;
-      // compute move vector in camera space
-      const camDir = new THREE.Vector3();
-      camera.getWorldDirection(camDir);
-      camDir.y = 0; camDir.normalize();
-      const camRight = new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0), camDir).normalize();
-      const move = new THREE.Vector3();
-      move.add(camDir.multiplyScalar(forward));
-      move.add(camRight.multiplyScalar(right));
-      if (move.lengthSq() > 0) move.normalize().multiplyScalar(player.speed * dt);
-      controls.getObject().position.add(move);
-
-      // gravity / floor clamp
-      if (controls.getObject().position.y < 1.6) controls.getObject().position.y = 1.6;
-
-      // spawn enemies over time
-      spawnTimer += dt * 1000;
-      if (spawnTimer >= spawnInterval){
-        spawnTimer = 0;
-        const count = 1 + Math.floor(player.level / 2);
-        for (let i=0;i<count;i++) spawnEnemy();
-        spawnInterval = Math.max(650, spawnInterval - 20);
-      }
-
-      // update enemies
-      updateEnemies(dt);
-
-      // update tracers & particles
-      updateTracers(dt);
-      updateParticles(dt);
-      renderParticles();
-
-      // update bullets visuals (none else)
-
-      // update recoil camera
-      if (recoil > 0){
-        camera.rotation.x = clamp(camera.rotation.x - recoil * 0.25, -Math.PI/2 + 0.05, Math.PI/2 - 0.05);
-        recoil = Math.max(0, recoil - dt * 2.8);
-      }
-
-      // render
-      renderer.render(scene, camera);
-
-      // overlay flash when hit
-      if (flash > 0){
-        flash = Math.max(0, flash - dt * 1.5);
-        // draw a transient overlay div or use CSS - we use body background tint
-        document.body.style.background = `rgba(255,60,60,${flash*0.08})`;
-      } else {
-        document.body.style.background = '';
-      }
-
-      // level progression
-      const newLvl = Math.floor(player.score / 80) + 1;
-      if (newLvl !== player.level){
-        player.level = newLvl;
-        player.speed += 0.6;
-        document.getElementById('level').textContent = player.level;
-      }
-
-      // update HUD
-      updateHUD();
-
-      if (player.hp <= 0){
-        // stop loop
-        gameOver();
-        return;
-      }
-
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
-
-  // game over
-  function gameOver(){
-    running = false;
-    // save highscore
-    const hsKey = 'ffish_hs';
-    const prev = Number(localStorage.getItem(hsKey) || 0);
-    if (player.score > prev) localStorage.setItem(hsKey, String(player.score));
-    document.getElementById('centerBox').innerHTML = `<h2>Game Over</h2><p>Bạn đạt ${player.score} điểm.</p><div style="margin-top:12px"><button id="btnRestart">Chơi lại</button></div>`;
-    document.getElementById('centerMsg').style.display = 'flex';
-    document.getElementById('btnRestart').addEventListener('click', () => {
-      document.location.reload();
-    });
-  }
-
-  // spawn initial enemies slowly
-  setTimeout(()=>{ spawnInterval = 1800; }, 800);
-
-  // helper: spawn some particles when bullet hits etc - handled in functions above
-
-  // small hitbox floor check (not needed)
-
-  // initial HUD
-  updateHUD();
-
-  // ensure audio starts on user gesture
-  function resumeAudioOnGesture(){
-    const resume = () => {
-      audioCtx.resume && audioCtx.resume();
-      window.removeEventListener('click', resume);
-      window.removeEventListener('touchstart', resume);
-    };
-    window.addEventListener('click', resume);
-    window.addEventListener('touchstart', resume);
-  }
-  resumeAudioOnGesture();
-
-  // request fullscreen on start for immersive feel (best on mobile)
-  function goFullscreen(){
-    const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-  }
-  document.getElementById('btnStart').addEventListener('click', goFullscreen);
-  document.getElementById('btnStart2').addEventListener('click', goFullscreen);
-
-  // clean up when leaving pointer lock
-  controls.addEventListener('unlock', () => {
-    // show center UI so user can resume
-    document.getElementById('centerMsg').style.display = 'flex';
+/* range listeners -> logs */
+['rangeGentle','rangeSensi','aimSmooth','aimSpeed','recoil'].forEach(id=>{
+  const el = $(id);
+  if(el) el.addEventListener('input', ()=> {
+    play('sndClick');
+    logEvent(`${id} => ${el.value}`);
   });
+});
 
-  // clamp utility repeated (ok)
-  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+/* theme buttons */
+$$('[data-theme]').forEach(b=> b.addEventListener('click', ()=>{
+  const t = b.dataset.theme;
+  if(t==='red'){ document.documentElement.style.setProperty('--accent','#ff2e2e'); document.documentElement.style.setProperty('--accent-2','#ff7b7b'); }
+  if(t==='purple'){ document.documentElement.style.setProperty('--accent','#9b5bff'); document.documentElement.style.setProperty('--accent-2','#ff8bd6'); }
+  if(t==='pink'){ document.documentElement.style.setProperty('--accent','#ff66b2'); document.documentElement.style.setProperty('--accent-2','#ffd6e6'); }
+  play('sndClick'); logEvent('Chọn theme: '+t);
+}));
 
-  // initial instruction for mobile rotate
-  if (isMobile){
-    // show overlay instruction if needed (left)
+/* particles toggle */
+$('toggleParticles').addEventListener('change', e=>{
+  document.getElementById('particles').style.display = e.target.checked ? 'block' : 'none';
+  play('sndClick'); logEvent('Particles => '+e.target.checked);
+});
+
+/* saveChat toggle handled on chat save operations */
+
+/* export/clear chat */
+$('clearChat').addEventListener('click', ()=> {
+  if(!confirm('Xóa toàn bộ chat lịch sử?')) return;
+  App.chat = []; renderChat(); if($('saveChat') && $('saveChat').checked) localStorage.removeItem('devtun_chat_'+App.session);
+  play('sndClick'); logEvent('Đã xóa chat');
+});
+
+/* load settings */
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem('devtun_settings');
+    if(raw){
+      const s = JSON.parse(raw);
+      if(s.saveChat !== undefined && $('saveChat')) $('saveChat').checked = s.saveChat;
+      if(s.particles !== undefined && $('toggleParticles')) { $('toggleParticles').checked = s.particles; document.getElementById('particles').style.display = s.particles ? 'block' : 'none'; }
+      if(s.aimLock !== undefined){ if(s.aimLock) $('lockAim').classList.add('on'); App.lockAim = !!s.aimLock; }
+      logEvent('Tải cài đặt');
+    }
+  }catch(e){}
+}
+
+/* auto save short settings when changed */
+['saveChat','toggleParticles'].forEach(id => { const el = $(id); if(el) el.addEventListener('change', ()=> {
+  const obj = { saveChat: $('saveChat')? $('saveChat').checked : false, particles: $('toggleParticles')? $('toggleParticles').checked : true, aimLock: App.lockAim||false };
+  localStorage.setItem('devtun_settings', JSON.stringify(obj));
+  logEvent('Lưu settings');
+})});
+
+/* =========================
+   Chat functionality + AI
+   ========================= */
+$('chatSend').addEventListener('click', ()=> { sendChat(); });
+$('chatInput').addEventListener('keyup', e=> { if(e.key === 'Enter') sendChat(); });
+
+function sendChat(){
+  const txt = $('chatInput').value.trim();
+  if(!txt) return;
+  pushChat('me', txt);
+  logEvent('User gửi chat: ' + txt);
+  $('chatInput').value = '';
+  play('sndClick');
+  adminReplyWithTyping(txt);
+}
+
+function adminReplyWithTyping(userTxt){
+  showTyping();
+  setTimeout(()=> {
+    hideTyping();
+    const reply = adminAI(userTxt);
+    pushChat('bot', reply);
+    logEvent('Admin trả lời: '+reply);
+    // if reply includes STK, play msg sound as special
+    if(reply.toLowerCase().includes('stk')) play('sndMsg');
+  }, 700 + Math.random()*900);
+}
+
+/* admin AI patterns including Mua Key */
+function adminAI(txt){
+  const s = txt.toLowerCase();
+  if(s.includes('stk') || s.includes('số tài khoản') || s.includes('sdt')) {
+    return "STK : 0378099746 - CTV : TRAN DAO THANH DAT";
   }
+  if(s.includes('mua key') || s.includes('muakey') || s.includes('mua')) {
+    // return price list & interactive options
+    return "Mua Key — Giá:\n• 50K [1 DAY]\n• 300K [1 THÁNG]\n• 500K [1 OB]\nNhấn nút Mua Key để chọn và hiển thị STK.";
+  }
+  if(['hi','hello','helo','xin chào','xin chao','chào','chao'].some(w=> s.includes(w))) {
+    return "Xin chào bạn đến với chúng tôi, bạn cần gì? Nhắn STK - XIN CHÀO Admin sẽ trả lời bạn";
+  }
+  if(s.includes('cảm ơn') || s.includes('cam on')) return "Rất vui được hỗ trợ bạn ❤️";
+  if(s.includes('social') || s.includes('facebook') || s.includes('tiktok') || s.includes('zalo')) return "Kênh: TikTok @tunlacuaai · Zalo 0378099746 · Facebook: TunDev";
+  return "Admin chưa hiểu rõ — thử 'Mua Key' / 'STK' / 'Xin chào'.";
+}
 
-  // click on canvas to lock pointer for desktop
-  canvas.addEventListener('click', () => {
-    if (!isMobile) controls.lock();
+/* typing indicator */
+function showTyping(){
+  const t = document.createElement('div'); t.id='typing'; t.className='typing'; t.textContent = 'Admin đang nhập...';
+  $('chatLog').appendChild(t); $('chatLog').scrollTop = $('chatLog').scrollHeight;
+}
+function hideTyping(){ const t = $('typing'); if(t) t.remove(); }
+
+/* Mua Key and STK buttons */
+$('btnMuaKey').addEventListener('click', ()=> {
+  // push message listing with clickable options
+  pushChat('bot', "Bảng giá:\n50K [1 DAY]  •  300K [1 THÁNG]  •  500K [1 OB]\nNhấn một lựa chọn để nhận STK.");
+  logEvent('Hiển thị bảng giá Mua Key');
+  // show quick purchase buttons in chat area (simple)
+  const box = $('chatLog');
+  const wrap = document.createElement('div'); wrap.style.display='flex'; wrap.style.gap='8px'; wrap.style.marginTop='6px';
+  ['50K [1 DAY]','300K [1 THÁNG]','500K [1 OB]'].forEach(opt=>{
+    const b = document.createElement('button'); b.className='btnPrimary'; b.textContent = opt; b.style.padding='8px 10px'; b.addEventListener('click', ()=>{
+      pushChat('me', 'Mua: ' + opt); logEvent('User chọn mua: '+opt);
+      // show STK automatically
+      setTimeout(()=> { pushChat('bot', "STK : 0378099746 - CTV : TRAN DAO THANH DAT\nVui lòng chuyển tiền, ghi nội dung: " + opt + " - " + (App.session||'session')); logEvent('Hiển thị STK cho ' + opt); }, 400);
+    }); wrap.appendChild(b);
   });
+  box.appendChild(wrap);
+  box.scrollTop = box.scrollHeight;
+});
 
-  // initial camera object tie
-  controls.getObject().position.set(0,1.6,0);
-  scene.add(controls.getObject());
+$('btnSTK').addEventListener('click', ()=> {
+  pushChat('bot', "STK : 0378099746 - CTV : TRAN DAO THANH DAT");
+  logEvent('User xem STK');
+});
 
+/* load saved chat for session if exists */
+function loadSavedChat(){
+  try{
+    const raw = localStorage.getItem('devtun_chat_'+App.session);
+    if(raw) { App.chat = JSON.parse(raw); renderChat(); $('chatCount').textContent = `Tin nhắn: ${App.chat.length}`; }
+  }catch(e){ App.chat = []; }
+}
+
+/* =========================
+   Admin greet on login
+   ========================= */
+function adminAutoGreet(){
+  pushChat('bot', 'Xin chào bạn đến với DevTun ❤️ — cần gì, bạn cứ nhắn nhé (gõ STK để lấy thông tin chuyển khoản).');
+  logEvent('Admin chào bạn nhé');
+}
+
+/* =========================
+   Drag aim crosshair logic
+   ========================= */
+const aimCross = $('aimCross');
+const aimSurface = $('aimSurface');
+let dragging = false;
+let start = {x:0,y:0}, orig = {x:0,y:0};
+
+function setAimPosition(normX, normY, save=true){
+  // normX, normY between 0 and 1 relative to surface
+  App.aimPos.x = Math.min(1, Math.max(0, normX));
+  App.aimPos.y = Math.min(1, Math.max(0, normY));
+  const w = aimSurface.clientWidth, h = aimSurface.clientHeight;
+  aimCross.style.left = (App.aimPos.x * 100) + '%';
+  aimCross.style.top = (App.aimPos.y * 100) + '%';
+  if(save) { localStorage.setItem('devtun_aimpos', JSON.stringify(App.aimPos)); logEvent('Cập nhật vị trí tâm: '+Math.round(App.aimPos.x*100)+'%, '+Math.round(App.aimPos.y*100)+'%'); }
+}
+
+function startDrag(e){
+  if(App.lockAim) return;
+  dragging = true; play('sndClick');
+  const rect = aimSurface.getBoundingClientRect();
+  const clientX = (e.touches? e.touches[0].clientX : e.clientX);
+  const clientY = (e.touches? e.touches[0].clientY : e.clientY);
+  const nx = (clientX - rect.left)/rect.width, ny = (clientY - rect.top)/rect.height;
+  setAimPosition(nx, ny);
+}
+function moveDrag(e){
+  if(!dragging) return;
+  const rect = aimSurface.getBoundingClientRect();
+  const clientX = (e.touches? e.touches[0].clientX : e.clientX);
+  const clientY = (e.touches? e.touches[0].clientY : e.clientY);
+  const nx = (clientX - rect.left)/rect.width, ny = (clientY - rect.top)/rect.height;
+  setAimPosition(nx, ny, false); // while moving, don't write log each move
+}
+function endDrag(e){
+  if(!dragging) return;
+  dragging = false;
+  // save final position
+  const rect = aimSurface.getBoundingClientRect();
+  const clientX = (e.changedTouches? e.changedTouches[0].clientX : e.clientX);
+  const clientY = (e.changedTouches? e.changedTouches[0].clientY : e.clientY);
+  const nx = (clientX - rect.left)/rect.width, ny = (clientY - rect.top)/rect.height;
+  setAimPosition(nx, ny, true);
+  play('sndClick');
+}
+aimSurface.addEventListener('pointerdown', startDrag);
+aimSurface.addEventListener('pointermove', moveDrag);
+window.addEventListener('pointerup', endDrag);
+aimSurface.addEventListener('touchstart', startDrag);
+aimSurface.addEventListener('touchmove', moveDrag);
+aimSurface.addEventListener('touchend', endDrag);
+
+// lock aim toggle uses class on element; persist
+$('lockAim').addEventListener('click', ()=> {
+  const on = $('lockAim').classList.contains('on');
+  localStorage.setItem('devtun_aim_lock', JSON.stringify(on));
+});
+
+/* restore aim pos */
+(function restoreAim(){
+  try{
+    const raw = localStorage.getItem('devtun_aimpos');
+    if(raw){ const obj = JSON.parse(raw); if(obj.x && obj.y) setAimPosition(obj.x, obj.y, false); }
+    const lock = JSON.parse(localStorage.getItem('devtun_aim_lock') || 'false');
+    if(lock) $('lockAim').classList.add('on'), App.lockAim = true;
+  }catch(e){}
 })();
+
+/* =========================
+   Device info (NO battery percent) -> Device Score, Latency, Tier
+   ========================= */
+async function loadDeviceInfo(){
+  const ua = navigator.userAgent || 'Unknown';
+  $('deviceUA').textContent = ua;
+  // compute "device score" simplistic based on UA keywords
+  let score = 40;
+  const lower = ua.toLowerCase();
+  if(lower.includes('iphone') || lower.includes('mac')) score += 30;
+  if(lower.includes('android')) score += 20;
+  if(lower.includes('intel') || lower.includes('apple')) score += 10;
+  score = Math.min(99, score + Math.floor(Math.random()*11));
+  $('deviceScore').textContent = score + ' / 100';
+  // latency simulate or measure via fetch to public endpoint? we simulate
+  const latency = randInt(20,180); $('deviceLatency').textContent = latency + ' ms';
+  // tier
+  let tier = 'Standard';
+  if(score > 80) tier = 'High-End';
+  else if(score > 60) tier = 'Upper-Mid';
+  else if(score > 45) tier = 'Mid';
+  $('deviceTier').textContent = tier;
+  logEvent('Cập nhật Device Info (score:'+score+', lat:'+latency+'ms)');
+}
+
+/* simple random helper */
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+/* =========================
+   Chat storage & logs load
+   ========================= */
+function loadSavedChat(){
+  try{
+    const raw = localStorage.getItem('devtun_chat_'+App.session);
+    if(raw){ App.chat = JSON.parse(raw); renderChat(); $('chatCount').textContent = `Tin nhắn: ${App.chat.length}`; }
+  }catch(e){}
+}
+function loadLogs(){
+  try{
+    const raw = localStorage.getItem('devtun_logs');
+    if(raw) App.logs = JSON.parse(raw); else App.logs = [];
+  }catch(e){ App.logs = []; }
+  renderLogs();
+}
+
+/* initial load: set first view and listeners */
+(function init(){
+  // default view
+  $$('.view').forEach(v=> v.classList.add('hidden'));
+  $('tabHome').classList.remove('hidden');
+  // tab buttons
+  $$('.tabbtn').forEach(tb => tb.addEventListener('click', ()=> {
+    $$('.tabbtn').forEach(x=>x.classList.remove('active'));
+    tb.classList.add('active');
+    const t = tb.dataset.tab;
+    $$('.view').forEach(v => { if(v.id === t) v.classList.remove('hidden'); else v.classList.add('hidden'); });
+  }));
+  // misc buttons
+  $('chatSend').addEventListener('click', ()=> sendChat());
+  $('btnSTK')?.addEventListener('click', ()=> { pushChat('bot','STK : 0378099746 - CTV : TRAN DAO THANH DAT'); logEvent('Xem STK'); });
+  // save logs initially
+  window.addEventListener('beforeunload', ()=> {
+    try{ localStorage.setItem('devtun_logs', JSON.stringify(App.logs)); }catch(e){}
+  });
+})();
+
 </script>
 </body>
 </html>
