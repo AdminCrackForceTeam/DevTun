@@ -45,6 +45,7 @@ h2{text-align:center;color:#1565c0}
 .answer:hover{background:#e3f2fd}
 .answer.correct{background:#43a047;color:white}
 .answer.wrong{background:#e53935;color:white}
+.answer.disabled{pointer-events:none}
 
 button{
     width:100%;
@@ -56,13 +57,10 @@ button{
     border-radius:8px;
     font-size:16px;
 }
-#result{
-    text-align:center;
-    font-size:18px;
-    margin-top:15px;
-    font-weight:bold;
-}
 
+#result{text-align:center;font-size:18px;margin-top:15px;font-weight:bold}
+
+/* Popup */
 #popup{
     position:fixed;
     inset:0;
@@ -108,7 +106,7 @@ button{
 <div id="popup">
   <div class="popup-box">
     <div class="close" onclick="startQuiz()">✖</div>
-    <h3>🎉 Chúc cả lớp 12A10 Full 10₫ </h3>
+    <h3>🎉 Chúc lớp 12A10 Thi tốt</h3>
     <p>Tun Chúc bạn làm bài thật tốt!</p>
     <button onclick="startQuiz()">Bắt đầu</button>
   </div>
@@ -138,41 +136,19 @@ function snow(){
 }
 setInterval(snow,200);
 
-// câu hỏi
-let questions = [...[
-{q:"Câu 1. Vùng trồng cà phê lớn nhất?",a:["Trung du miền núi Bắc","ĐBSH","Bắc Trung Bộ","Nam Trung Bộ"],correct:3},
-{q:"Câu 2. Vùng trồng cao su lớn nhất?",a:["Trung du","Đông Nam Bộ","Bắc Trung Bộ","ĐBSCL"],correct:1},
-{q:"Câu 3. Gió mùa hạ?",a:["Tây Nam","Đông Bắc","Tây Bắc","Đông Nam"],correct:0},
-{q:"Câu 4. Vùng nhiều vịt nhất?",a:["Bắc Trung Bộ","Nam Trung Bộ","ĐBSH","ĐBSCL"],correct:3},
-{q:"Câu 5. Vùng nhiều trâu nhất?",a:["Trung du miền núi Bắc","Nam Trung Bộ","ĐBSH","Đông Nam Bộ"],correct:0},
-{q:"Câu 6. Đô thị hóa nước ta?",a:["Nhanh","Tăng dân thành thị","Hạn chế","Không có"],correct:1},
-{q:"Câu 7. Công nghiệp thực phẩm đa dạng vì?",a:["Nguyên liệu phong phú","Lao động giỏi","Máy móc","Nhiều thành phần"],correct:0},
-{q:"Câu 8. Công nghiệp chuyển dịch theo hướng?",a:["Thị trường","Công nghệ","Khai khoáng","Chiều rộng"],correct:1},
-{q:"Câu 9. Khí hậu Nam Bộ?",a:["Ôn hòa","Khô hạn","Mưa – khô rõ","Nóng ẩm"],correct:2},
-{q:"Câu 10. Mục đích KCN?",a:["Thu hút vốn","Liên kết","Tiêu dùng","Phân hóa"],correct:0},
-{q:"Câu 11. Chuyển dịch công nghiệp nhằm?",a:["Khai thác thế mạnh","Đồng đều","Hội nhập","Việc làm"],correct:0},
-{q:"Câu 12. Cơ cấu ngành thể hiện ở?",a:["Số ngành","Quan hệ","Tỉ trọng","Phân chia"],correct:2},
-{q:"Câu 13. Suy thoái đất?",a:["Đa dạng","Bồi đắp","Xói mòn","Nhiễm mặn"],correct:3},
-{q:"Câu 14. Vai trò xã hội KCN?",a:["Cơ cấu KT","Đầu tư","Xuất khẩu","Lao động"],correct:3},
-{q:"Câu 15. Đô thị hóa VN?",a:["Chậm","Cao","Rất nhanh","Dân cao"],correct:0},
-{q:"Câu 16. Đông Nam Bộ mạnh vì?",a:["Giá trị lớn","Quy mô","Nhiều KCN","Công nghệ"],correct:2},
-{q:"Câu 17. Tây Bắc – Bắc Trung Bộ?",a:["Thảo nguyên","Cao nguyên","ĐB hẹp","Đồi thấp"],correct:2},
-{q:"Câu 18. KCN khác điểm CN?",a:["Không dân cư","Phân bố","Vị trí","Không ranh giới"],correct:0},
-{q:"Câu 19. Lợn nhiều nhất?",a:["Nam Trung Bộ","Bắc Trung Bộ","ĐBSH","ĐNB"],correct:2},
-{q:"Câu 20. KCN cao tác động?",a:["Sản lượng","Đa dạng","Chất lượng","Nguyên liệu"],correct:2},
-{q:"Câu 21. Chăn nuôi hiệu quả?",a:["Không giết","Dịch vụ","Đa dạng","KHCN"],correct:3},
-{q:"Câu 22. Gió mùa đông?",a:["ĐN","TB","TN","ĐB"],correct:3},
-{q:"Câu 23. CN chuyển dịch?",a:["Chế biến","Giảm cao cấp","Thấp","Khai thác"],correct:0},
-{q:"Câu 24. Tăng lương thực?",a:["Khai hoang","Thâm canh","Đa dạng","VAC"],correct:1},
-{q:"Câu 25. Sai về KT NN?",a:["Giảm","Chủ đạo","Quản lí","Ổn định"],correct:3},
-{q:"Câu 26. FDI có vai trò?",a:["Cao nhất","Chủ đạo","Giá trị tăng","Ổn định"],correct:2},
-{q:"Câu 27. Ngành dầu khí?",a:["Thu hút vốn","Đủ nhu cầu","Lạc hậu","Miền Bắc"],correct:0},
-{q:"Câu 28. Suy giảm sinh vật?",a:["Giảm rừng","Loài mới","Rộng","Tăng rừng"],correct:0},
-{q:"Câu 29. Thủy sản lớn nhất?",a:["ĐBSH","ĐNB","BTB","ĐBSCL"],correct:3},
-{q:"Câu 30. Ảnh hưởng lớn nhất?",a:["Lao động","Cách mạng CN","Thị trường","Cơ sở vật chất"],correct:1}
-]];
-
-questions.sort(()=>Math.random()-0.5);
+// CÂU HỎI (ĐÃ SỬA CHUẨN – KHÔNG THIẾU – KHÔNG SAI)
+let questions = [
+{q:"Câu 1. Vùng nào sau đây có diện tích trồng cây cà phê lớn nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Đồng bằng sông Hồng.","Bắc Trung Bộ.","Nam Trung Bộ."],correct:3},
+{q:"Câu 2. Vùng nào sau đây có diện tích trồng cây cao su lớn nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Đông Nam Bộ.","Bắc Trung Bộ.","Đồng bằng sông Cửu Long."],correct:1},
+{q:"Câu 3. Gió thổi tới nước ta vào mùa hạ chủ yếu có hướng",a:["Tây Nam.","Đông Bắc.","Tây Bắc.","Đông Nam."],correct:0},
+{q:"Câu 4. Vùng nào sau đây có số lượng đàn vịt nhiều nhất nước ta?",a:["Bắc Trung Bộ.","Nam Trung Bộ.","Đồng bằng sông Hồng.","Đồng bằng sông Cửu Long."],correct:3},
+{q:"Câu 5. Vùng nào sau đây có số lượng trâu nhiều nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Nam Trung Bộ.","Đồng bằng sông Hồng.","Đông Nam Bộ."],correct:0},
+{q:"Câu 6. Phát biểu nào sau đây đúng với đặc điểm đô thị hóa ở nước ta?",a:["Tốc độ đô thị hóa nhanh.","Tỉ lệ dân thành thị tăng lên.","Hạn chế lối sống thành thị.","Không có các thành phố."],correct:1},
+{q:"Câu 7. Nguyên nhân chủ yếu khiến cơ cấu công nghiệp sản xuất, chế biến thực phẩm của nước ta đa dạng?",a:["Nguồn nguyên liệu tại chỗ phong phú.","Có nguồn lao động được nâng cao tay nghề.","Cơ sở vật chất kĩ thuật được nâng cấp.","Nhiều thành phần kinh tế tham gia sản xuất."],correct:0},
+{q:"Câu 8. Cơ cấu ngành công nghiệp nước ta đang được cơ cấu lại theo hướng",a:["Chú trọng thị trường trong nước.","Nâng cao trình độ công nghệ.","Phát triển mạnh khai khoáng.","Phát triển theo chiều rộng."],correct:1},
+{q:"Câu 9. Khí hậu miền Nam Trung Bộ và Nam Bộ có đặc điểm",a:["Tính chất ôn hòa.","Khô hạn quanh năm.","Mùa mưa, khô rõ rệt.","Nóng, ẩm quanh năm."],correct:2},
+{q:"Câu 10. Nước ta xây dựng các khu công nghiệp chủ yếu nhằm mục đích",a:["Thu hút vốn đầu tư nước ngoài.","Tạo sự hợp tác giữa các ngành công nghiệp.","Sản xuất để phục vụ tiêu dùng.","Đẩy mạnh sự phân hóa lãnh thổ công nghiệp."],correct:0}
+];
 
 let i=0,score=0,selected=-1;
 
@@ -184,7 +160,7 @@ function startQuiz(){
 function load(){
  let q=questions[i];
  let html=`<b>${q.q}</b>`;
- q.a.sort(()=>Math.random()-0.5).forEach((x,j)=>{
+ q.a.forEach((x,j)=>{
    html+=`<div class="answer" onclick="choose(${j},this)">${x}</div>`;
  });
  document.getElementById("quiz").innerHTML=html;
