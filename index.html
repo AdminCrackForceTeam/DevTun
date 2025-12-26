@@ -10,6 +10,7 @@ body{
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg,#2196f3,#00bcd4);
     margin:0;
+    overflow:hidden;
 }
 .box{
     max-width:720px;
@@ -18,15 +19,10 @@ body{
     padding:20px;
     border-radius:14px;
     box-shadow:0 4px 15px rgba(0,0,0,.3);
+    position:relative;
+    z-index:2;
 }
 h2{text-align:center;color:#1565c0}
-input{
-    width:100%;
-    padding:12px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    margin-bottom:10px;
-}
 .progress{
     height:8px;
     background:#ddd;
@@ -65,11 +61,11 @@ button{
     font-weight:bold;
 }
 
-/* Popup chào */
+/* Popup */
 #popup{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.5);
+    background:rgba(0,0,0,.6);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -81,38 +77,44 @@ button{
     border-radius:12px;
     text-align:center;
     max-width:320px;
-    animation: zoom .4s ease;
 }
-.popup-box h3{color:#1565c0}
 .close{
     position:absolute;
-    right:15px;
-    top:10px;
+    right:20px;
+    top:15px;
     font-size:22px;
     cursor:pointer;
 }
-@keyframes zoom{
-    from{transform:scale(.5);opacity:0}
-    to{transform:scale(1);opacity:1}
+
+/* Tuyết */
+.snow{
+    position:fixed;
+    top:-10px;
+    color:white;
+    font-size:14px;
+    animation: fall linear infinite;
+    z-index:1;
+}
+@keyframes fall{
+    to{transform:translateY(110vh);}
 }
 </style>
 </head>
 
 <body>
 
-<!-- Popup chào -->
+<!-- Popup -->
 <div id="popup">
   <div class="popup-box">
-    <div class="close" onclick="closePopup()">✖</div>
-    <h3>🎉 Chào mừng bạn!</h3>
-    <p>Chúc bạn làm bài thật tốt 💯</p>
-    <button onclick="closePopup()">Bắt đầu làm bài</button>
+    <div class="close" onclick="startQuiz()">✖</div>
+    <h3>🎉 Thi tốt nhé 12A10</h3>
+    <p>Tun Chúc bạn làm bài thật tốt!</p>
+    <button onclick="startQuiz()">Bắt đầu làm bài</button>
   </div>
 </div>
 
 <div class="box">
 <h2>KIỂM TRA ĐỊA LÍ</h2>
-<input id="name" placeholder="Nhập tên học sinh">
 
 <div class="progress"><div class="bar" id="bar"></div></div>
 <div id="quiz"></div>
@@ -123,46 +125,117 @@ button{
 
 <!-- Âm thanh -->
 <audio id="ting" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-<audio id="start" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
+<audio id="startSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
 
 <script>
-document.getElementById("start").play();
-
-function closePopup(){
+function startQuiz(){
  document.getElementById("popup").style.display="none";
+ document.getElementById("startSound").play();
 }
 
-const questions = [
-{q:"Câu 1. Vùng nào có diện tích trồng cà phê lớn nhất?",a:["Trung du và miền núi phía Bắc","Đồng bằng sông Hồng","Bắc Trung Bộ","Nam Trung Bộ"],correct:3},
-{q:"Câu 2. Vùng trồng cao su lớn nhất?",a:["Trung du và miền núi phía Bắc","Đông Nam Bộ","Bắc Trung Bộ","ĐBSCL"],correct:1},
-{q:"Câu 3. Gió mùa hạ chủ yếu hướng nào?",a:["Tây Nam","Đông Bắc","Tây Bắc","Đông Nam"],correct:0},
-{q:"Câu 4. Vùng nuôi vịt nhiều nhất?",a:["Bắc Trung Bộ","Nam Trung Bộ","ĐBSH","ĐBSCL"],correct:3},
-{q:"Câu 5. Vùng nuôi trâu nhiều nhất?",a:["TDMNPB","Nam Trung Bộ","ĐBSH","Đông Nam Bộ"],correct:0},
-{q:"Câu 6. Đặc điểm đô thị hóa nước ta?",a:["Tốc độ nhanh","Tỉ lệ dân tăng","Hạn chế lối sống","Không có TP"],correct:1},
-{q:"Câu 7. Nguyên nhân CNTP đa dạng?",a:["Nguyên liệu phong phú","Lao động cao","Kĩ thuật tốt","Nhiều thành phần"],correct:0},
-{q:"Câu 8. Công nghiệp chuyển dịch theo hướng?",a:["Trong nước","Nâng cao công nghệ","Khai khoáng","Chiều rộng"],correct:1},
-{q:"Câu 9. Khí hậu Nam Trung Bộ – Nam Bộ?",a:["Ôn hòa","Khô quanh năm","Mưa – khô rõ","Nóng ẩm"],correct:2},
-{q:"Câu 10. Mục đích xây KCN?",a:["Thu hút FDI","Hợp tác CN","Tiêu dùng","Phân hóa lãnh thổ"],correct:0},
-{q:"Câu 11. Mục đích chuyển dịch CN?",a:["Khai thác thế mạnh","Phát triển đều","Hội nhập","Việc làm"],correct:0},
-{q:"Câu 12. Cơ cấu ngành thể hiện ở?",a:["Số ngành","Quan hệ ngành","Tỉ trọng ngành","Phân chia"],correct:2},
-{q:"Câu 13. Suy thoái đất đồng bằng?",a:["Đa dạng đất","Phù sa","Xói mòn","Nhiễm mặn"],correct:3},
-{q:"Câu 14. Vai trò xã hội KCN?",a:["Chuyển dịch KT","Thu hút vốn","Xuất khẩu","Chuyển dịch LĐ"],correct:3},
-{q:"Câu 15. Đô thị hóa nước ta?",a:["Chậm","Cao","Nhanh","Tỉ lệ lớn"],correct:0},
-{q:"Câu 16. Đông Nam Bộ CN cao vì?",a:["Giá trị cao","Quy mô lớn","Nhiều KCN","Công nghệ cao"],correct:2},
-{q:"Câu 17. Địa hình Tây Bắc – Bắc Trung Bộ?",a:["Thảo nguyên","Cao nguyên","ĐB hẹp","Đồi thấp"],correct:2},
-{q:"Câu 18. Khác KCN & điểm CN?",a:["Không dân cư","Không đều","Vị trí tốt","Không ranh giới"],correct:0},
-{q:"Câu 19. Vùng nuôi lợn nhiều?",a:["Nam Trung Bộ","Bắc Trung Bộ","ĐBSH","Đông Nam Bộ"],correct:2},
-{q:"Câu 20. KCN công nghệ cao giúp?",a:["Tăng sản lượng","Đa dạng","Tăng chất lượng","Giảm phụ thuộc"],correct:2},
-{q:"Câu 21. Xu hướng chăn nuôi?",a:["SP không giết","Dịch vụ","Đa dạng","Ứng dụng KHKT"],correct:3},
-{q:"Câu 22. Gió mùa đông?",a:["Đông Nam","Tây Bắc","Tây Nam","Đông Bắc"],correct:3},
-{q:"Câu 23. CN chuyển dịch theo?",a:["Chế biến","Giảm cao cấp","Chất lượng thấp","Khai thác"],correct:0},
-{q:"Câu 24. Tăng lương thực?",a:["Khai hoang","Thâm canh","Đa dạng","VAC"],correct:1},
-{q:"Câu 25. Sai về KT Nhà nước?",a:["Giảm tỉ trọng","Chủ đạo","Quản lí","Ổn định"],correct:3},
-{q:"Câu 26. Vai trò FDI?",a:["Cao nhất GDP","Chủ đạo","Giá trị tăng","Ổn định"],correct:2},
-{q:"Câu 27. Ngành dầu khí?",a:["Thu hút FDI","Đủ nhu cầu","Lạc hậu","Miền Bắc"],correct:0},
-{q:"Câu 28. Suy giảm sinh vật?",a:["Rừng giảm","Loài mới","Rộng","Tăng rừng"],correct:0},
-{q:"Câu 29. Nuôi thủy sản nhiều?",a:["ĐBSH","Đông Nam Bộ","Bắc Trung Bộ","ĐBSCL"],correct:3},
-{q:"Câu 30. Tác động KCN?",a:["Lao động","Cách mạng CN","Thị trường","CSVC"],correct:1},
+/* Tuyết */
+function createSnow(){
+ let snow=document.createElement("div");
+ snow.className="snow";
+ snow.innerHTML="❄";
+ snow.style.left=Math.random()*window.innerWidth+"px";
+ snow.style.animationDuration=(3+Math.random()*5)+"s";
+ document.body.appendChild(snow);
+ setTimeout(()=>snow.remove(),8000);
+}
+setInterval(createSnow,200);
+
+const questions=[
+
+{q:"Câu 1. Vùng nào sau đây có diện tích trồng cây cà phê lớn nhất nước ta?",
+a:["Trung du và miền núi phía Bắc","Đồng bằng sông Hồng","Bắc Trung Bộ","Nam Trung Bộ"],correct:3},
+
+{q:"Câu 2. Vùng nào có diện tích trồng cây cao su lớn nhất nước ta?",
+a:["Trung du và miền núi phía Bắc","Đông Nam Bộ","Bắc Trung Bộ","Đồng bằng sông Cửu Long"],correct:1},
+
+{q:"Câu 3. Gió thổi tới nước ta vào mùa hạ chủ yếu có hướng nào?",
+a:["Tây Nam","Đông Bắc","Tây Bắc","Đông Nam"],correct:0},
+
+{q:"Câu 4. Vùng nào có số lượng đàn vịt nhiều nhất nước ta?",
+a:["Bắc Trung Bộ","Nam Trung Bộ","Đồng bằng sông Hồng","Đồng bằng sông Cửu Long"],correct:3},
+
+{q:"Câu 5. Vùng nào có số lượng trâu nhiều nhất nước ta?",
+a:["Trung du và miền núi phía Bắc","Nam Trung Bộ","Đồng bằng sông Hồng","Đông Nam Bộ"],correct:0},
+
+{q:"Câu 6. Đặc điểm đúng về đô thị hóa nước ta là?",
+a:["Tốc độ đô thị hóa nhanh","Tỉ lệ dân thành thị tăng lên","Hạn chế lối sống thành thị","Không có các thành phố"],correct:1},
+
+{q:"Câu 7. Nguyên nhân chủ yếu làm công nghiệp chế biến thực phẩm đa dạng?",
+a:["Nguồn nguyên liệu tại chỗ phong phú","Nguồn lao động tay nghề cao","Cơ sở vật chất hiện đại","Nhiều thành phần kinh tế"],correct:0},
+
+{q:"Câu 8. Cơ cấu ngành công nghiệp nước ta đang chuyển dịch theo hướng?",
+a:["Chú trọng thị trường trong nước","Nâng cao trình độ công nghệ","Phát triển khai khoáng","Phát triển theo chiều rộng"],correct:1},
+
+{q:"Câu 9. Khí hậu Nam Trung Bộ và Nam Bộ có đặc điểm gì?",
+a:["Ôn hòa","Khô hạn quanh năm","Mùa mưa và mùa khô rõ rệt","Nóng ẩm quanh năm"],correct:2},
+
+{q:"Câu 10. Mục đích chủ yếu xây dựng khu công nghiệp?",
+a:["Thu hút vốn đầu tư nước ngoài","Tạo sự hợp tác ngành","Sản xuất tiêu dùng","Phân hóa lãnh thổ"],correct:0},
+
+{q:"Câu 11. Mục đích chuyển dịch cơ cấu công nghiệp theo lãnh thổ?",
+a:["Khai thác thế mạnh từng vùng","Phát triển đồng đều","Hội nhập quốc tế","Giải quyết việc làm"],correct:0},
+
+{q:"Câu 12. Cơ cấu công nghiệp theo ngành thể hiện rõ nhất ở?",
+a:["Số lượng ngành","Quan hệ giữa các ngành","Tỉ trọng các ngành","Sự phân chia ngành"],correct:2},
+
+{q:"Câu 13. Biểu hiện suy thoái đất ở đồng bằng?",
+a:["Đất đa dạng","Phù sa bồi đắp","Xói mòn mạnh","Nhiễm mặn"],correct:3},
+
+{q:"Câu 14. Vai trò xã hội của khu công nghiệp?",
+a:["Chuyển dịch cơ cấu kinh tế","Thu hút vốn đầu tư","Tăng xuất khẩu","Chuyển dịch cơ cấu lao động"],correct:3},
+
+{q:"Câu 15. Nhận xét đúng về đô thị hóa nước ta?",
+a:["Tốc độ còn chậm","Trình độ cao","Diễn ra rất nhanh","Dân thành thị chiếm cao"],correct:0},
+
+{q:"Câu 16. Đông Nam Bộ có mức độ tập trung công nghiệp cao vì?",
+a:["Giá trị sản xuất lớn","Quy mô lớn","Nhiều khu công nghiệp","Công nghệ hiện đại"],correct:2},
+
+{q:"Câu 17. Đặc điểm địa hình Tây Bắc và Bắc Trung Bộ?",
+a:["Thảo nguyên rộng","Cao nguyên xếp tầng","Đồng bằng ven biển hẹp","Đồi núi thấp"],correct:2},
+
+{q:"Câu 18. Điểm khác nhau giữa khu công nghiệp và điểm công nghiệp?",
+a:["Không có dân cư","Phân bố không đều","Vị trí thuận lợi","Không ranh giới"],correct:0},
+
+{q:"Câu 19. Vùng có số lượng lợn nhiều nhất?",
+a:["Nam Trung Bộ","Bắc Trung Bộ","Đồng bằng sông Hồng","Đông Nam Bộ"],correct:2},
+
+{q:"Câu 20. Khu công nghệ cao có tác động chủ yếu là?",
+a:["Tăng sản lượng","Đa dạng sản phẩm","Nâng cao chất lượng","Giảm phụ thuộc nguyên liệu"],correct:2},
+
+{q:"Câu 21. Xu hướng nâng cao hiệu quả chăn nuôi?",
+a:["Tăng sản phẩm không giết thịt","Phát triển dịch vụ","Đa dạng đàn vật nuôi","Ứng dụng khoa học kỹ thuật"],correct:3},
+
+{q:"Câu 22. Gió mùa đông thổi theo hướng?",
+a:["Đông Nam","Tây Bắc","Tây Nam","Đông Bắc"],correct:3},
+
+{q:"Câu 23. Cơ cấu sản xuất công nghiệp chuyển dịch theo hướng?",
+a:["Tăng công nghiệp chế biến","Giảm sản phẩm cao cấp","Tăng sản phẩm chất lượng thấp","Tăng khai thác"],correct:0},
+
+{q:"Câu 24. Biện pháp tăng sản lượng lương thực?",
+a:["Khai hoang","Thâm canh tăng vụ","Đa dạng hóa","Mô hình VAC"],correct:1},
+
+{q:"Câu 25. Nhận xét sai về kinh tế nhà nước?",
+a:["Tỉ trọng giảm","Giữ vai trò chủ đạo","Quản lí ngành then chốt","Tỉ trọng ổn định"],correct:3},
+
+{q:"Câu 26. Vai trò khu vực đầu tư nước ngoài?",
+a:["Đóng góp cao nhất","Giữ vai trò chủ đạo","Giá trị kinh tế tăng","Tỉ trọng ổn định"],correct:2},
+
+{q:"Câu 27. Đặc điểm ngành dầu khí?",
+a:["Thu hút nhiều vốn đầu tư","Đáp ứng đủ nhu cầu","Kĩ thuật lạc hậu","Tập trung miền Bắc"],correct:0},
+
+{q:"Câu 28. Biểu hiện suy giảm tài nguyên sinh vật?",
+a:["Chất lượng rừng giảm","Xuất hiện loài mới","Phân bố rộng","Tăng rừng trồng"],correct:0},
+
+{q:"Câu 29. Vùng nuôi trồng thủy sản lớn nhất?",
+a:["Đồng bằng sông Hồng","Đông Nam Bộ","Bắc Trung Bộ","Đồng bằng sông Cửu Long"],correct:3},
+
+{q:"Câu 30. Nhân tố ảnh hưởng lớn nhất đến khu công nghiệp?",
+a:["Nguồn lao động","Cách mạng công nghiệp","Thị trường","Cơ sở vật chất"],correct:1},
 ];
 
 let i=0,score=0,selected=-1;
@@ -193,7 +266,7 @@ function next(){
  if(i<questions.length) load();
  else{
    document.getElementById("quiz").innerHTML="";
-   document.getElementById("result").innerHTML=`🎉 Hoàn thành!<br>Điểm: <b>${score}/30</b>`;
+   document.getElementById("result").innerHTML=`🎉 Hoàn thành bài thi<br>Điểm: <b>${score}/30</b>`;
  }
 }
 load();
