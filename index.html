@@ -19,22 +19,11 @@ body{
     padding:20px;
     border-radius:14px;
     box-shadow:0 4px 15px rgba(0,0,0,.3);
-    position:relative;
-    z-index:2;
 }
 h2{text-align:center;color:#1565c0}
-.progress{
-    height:8px;
-    background:#ddd;
-    border-radius:6px;
-    overflow:hidden;
-}
-.bar{
-    height:100%;
-    width:0%;
-    background:#1e88e5;
-    transition:.3s;
-}
+.progress{height:8px;background:#ddd;border-radius:6px;overflow:hidden}
+.bar{height:100%;width:0%;background:#1e88e5;transition:.3s}
+
 .answer{
     border:1px solid #ccc;
     padding:10px;
@@ -60,7 +49,6 @@ button{
 
 #result{text-align:center;font-size:18px;margin-top:15px;font-weight:bold}
 
-/* Popup */
 #popup{
     position:fixed;
     inset:0;
@@ -68,46 +56,29 @@ button{
     display:flex;
     align-items:center;
     justify-content:center;
-    z-index:999;
 }
 .popup-box{
     background:white;
     padding:25px;
     border-radius:12px;
     text-align:center;
-    max-width:320px;
-    position:relative;
-}
-.close{
-    position:absolute;
-    right:15px;
-    top:10px;
-    font-size:22px;
-    cursor:pointer;
 }
 
 .snow{
     position:fixed;
     top:-10px;
     color:white;
-    font-size:14px;
-    animation: fall linear infinite;
-    z-index:1;
+    animation:fall linear infinite;
 }
-@keyframes fall{
-    to{transform:translateY(110vh);}
-}
+@keyframes fall{to{transform:translateY(110vh)}}
 </style>
 </head>
 
 <body>
 
-<!-- Popup -->
 <div id="popup">
   <div class="popup-box">
-    <div class="close" onclick="startQuiz()">✖</div>
-    <h3>🎉 Chúc lớp 12A10 Thi tốt</h3>
-    <p>Tun Chúc bạn làm bài thật tốt!</p>
+    <h3>🎉 Chúc bạn làm bài thật tốt!</h3>
     <button onclick="startQuiz()">Bắt đầu</button>
   </div>
 </div>
@@ -116,7 +87,10 @@ button{
 <h2>KIỂM TRA ĐỊA LÍ</h2>
 <div class="progress"><div class="bar" id="bar"></div></div>
 <div id="quiz"></div>
-<button onclick="next()">Tiếp theo</button>
+
+<button id="nextBtn" onclick="next()">Tiếp theo</button>
+<button id="restartBtn" onclick="restart()" style="display:none;background:#43a047">🔁 Làm lại bài</button>
+
 <div id="result"></div>
 </div>
 
@@ -124,7 +98,6 @@ button{
 <audio id="wrong" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
 
 <script>
-    
 function snow(){
  let s=document.createElement("div");
  s.className="snow";
@@ -136,7 +109,6 @@ function snow(){
 }
 setInterval(snow,200);
 
-// CÂU HỎI (ĐÃ SỬA CHUẨN – KHÔNG THIẾU – KHÔNG SAI)
 let questions = [
 {q:"Câu 1. Vùng nào sau đây có diện tích trồng cây cà phê lớn nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Đồng bằng sông Hồng.","Bắc Trung Bộ.","Nam Trung Bộ."],correct:3},
 {q:"Câu 2. Vùng nào sau đây có diện tích trồng cây cao su lớn nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Đông Nam Bộ.","Bắc Trung Bộ.","Đồng bằng sông Cửu Long."],correct:1},
@@ -144,13 +116,34 @@ let questions = [
 {q:"Câu 4. Vùng nào sau đây có số lượng đàn vịt nhiều nhất nước ta?",a:["Bắc Trung Bộ.","Nam Trung Bộ.","Đồng bằng sông Hồng.","Đồng bằng sông Cửu Long."],correct:3},
 {q:"Câu 5. Vùng nào sau đây có số lượng trâu nhiều nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Nam Trung Bộ.","Đồng bằng sông Hồng.","Đông Nam Bộ."],correct:0},
 {q:"Câu 6. Phát biểu nào sau đây đúng với đặc điểm đô thị hóa ở nước ta?",a:["Tốc độ đô thị hóa nhanh.","Tỉ lệ dân thành thị tăng lên.","Hạn chế lối sống thành thị.","Không có các thành phố."],correct:1},
-{q:"Câu 7. Nguyên nhân chủ yếu khiến cơ cấu công nghiệp sản xuất, chế biến thực phẩm của nước ta đa dạng?",a:["Nguồn nguyên liệu tại chỗ phong phú.","Có nguồn lao động được nâng cao tay nghề.","Cơ sở vật chất kĩ thuật được nâng cấp.","Nhiều thành phần kinh tế tham gia sản xuất."],correct:0},
+{q:"Câu 7. Nguyên nhân chủ yếu khiến cơ cấu công nghiệp chế biến thực phẩm đa dạng?",a:["Nguồn nguyên liệu tại chỗ phong phú.","Có nguồn lao động được nâng cao tay nghề.","Cơ sở vật chất kĩ thuật được nâng cấp.","Nhiều thành phần kinh tế tham gia sản xuất."],correct:0},
 {q:"Câu 8. Cơ cấu ngành công nghiệp nước ta đang được cơ cấu lại theo hướng",a:["Chú trọng thị trường trong nước.","Nâng cao trình độ công nghệ.","Phát triển mạnh khai khoáng.","Phát triển theo chiều rộng."],correct:1},
 {q:"Câu 9. Khí hậu miền Nam Trung Bộ và Nam Bộ có đặc điểm",a:["Tính chất ôn hòa.","Khô hạn quanh năm.","Mùa mưa, khô rõ rệt.","Nóng, ẩm quanh năm."],correct:2},
-{q:"Câu 10. Nước ta xây dựng các khu công nghiệp chủ yếu nhằm mục đích",a:["Thu hút vốn đầu tư nước ngoài.","Tạo sự hợp tác giữa các ngành công nghiệp.","Sản xuất để phục vụ tiêu dùng.","Đẩy mạnh sự phân hóa lãnh thổ công nghiệp."],correct:0}
+{q:"Câu 10. Nước ta xây dựng các khu công nghiệp chủ yếu nhằm mục đích",a:["Thu hút vốn đầu tư nước ngoài.","Tạo sự hợp tác giữa các ngành công nghiệp.","Sản xuất để phục vụ tiêu dùng.","Đẩy mạnh sự phân hóa lãnh thổ công nghiệp."],correct:0},
+
+{q:"Câu 11. Cơ cấu công nghiệp theo lãnh thổ chuyển dịch nhằm",a:["Khai thác thế mạnh từng vùng.","Phát triển đồng đều.","Hội nhập quốc tế.","Giải quyết việc làm."],correct:0},
+{q:"Câu 12. Biểu hiện rõ nhất của cơ cấu công nghiệp theo ngành là",a:["Số lượng ngành.","Mối quan hệ ngành.","Tỉ trọng từng ngành.","Sự phân chia ngành."],correct:2},
+{q:"Câu 13. Suy thoái đất ở đồng bằng thể hiện ở",a:["Nhiều loại đất.","Phù sa bồi đắp.","Xói mòn.","Nhiễm mặn."],correct:3},
+{q:"Câu 14. Vai trò xã hội của khu công nghiệp là",a:["Chuyển dịch cơ cấu kinh tế.","Thu hút đầu tư.","Nâng cao xuất khẩu.","Chuyển dịch cơ cấu lao động."],correct:3},
+{q:"Câu 15. Đặc điểm đúng của đô thị hóa nước ta",a:["Tốc độ còn chậm.","Trình độ cao.","Diễn ra nhanh.","Tỉ lệ dân thành thị cao."],correct:0},
+{q:"Câu 16. Đông Nam Bộ tập trung công nghiệp cao vì",a:["Giá trị công nghiệp lớn.","KCN quy mô lớn.","Tập trung nhiều KCN.","Nhiều KCN công nghệ cao."],correct:2},
+{q:"Câu 17. Đặc điểm địa hình Tây Bắc – Bắc Trung Bộ",a:["Thảo nguyên.","Cao nguyên.","Đồng bằng ven biển hẹp.","Đồi núi thấp."],correct:2},
+{q:"Câu 18. Khác nhau giữa KCN và điểm CN là",a:["Không có dân cư.","Không đều lãnh thổ.","Vị trí thuận lợi.","Không ranh giới."],correct:0},
+{q:"Câu 19. Vùng có số lợn nhiều nhất",a:["Nam Trung Bộ.","Bắc Trung Bộ.","Đồng bằng sông Hồng.","Đông Nam Bộ."],correct:2},
+{q:"Câu 20. Khu công nghệ cao giúp",a:["Tăng sản lượng.","Đa dạng hóa.","Nâng cao chất lượng.","Giảm phụ thuộc."],correct:2},
+{q:"Câu 21. Xu hướng chăn nuôi hiện nay",a:["Tăng sản phẩm không giết thịt.","Phát triển dịch vụ.","Đa dạng đàn.","Ứng dụng khoa học kĩ thuật."],correct:3},
+{q:"Câu 22. Gió mùa đông thổi hướng",a:["Đông Nam.","Tây Bắc.","Tây Nam.","Đông Bắc."],correct:3},
+{q:"Câu 23. Cơ cấu công nghiệp chuyển theo hướng",a:["Tăng chế biến.","Giảm sản phẩm cao.","Tăng sản phẩm thấp.","Tăng khai thác."],correct:0},
+{q:"Câu 24. Tăng sản lượng lương thực bằng",a:["Khai hoang.","Thâm canh tăng vụ.","Đa dạng hóa.","VAC."],correct:1},
+{q:"Câu 25. Không đúng về kinh tế Nhà nước",a:["Tỉ trọng giảm.","Giữ vai trò chủ đạo.","Quản lí then chốt.","Giữ ổn định GDP."],correct:3},
+{q:"Câu 26. Vai trò FDI",a:["Cao nhất GDP.","Chủ đạo.","Giá trị tăng cao.","Ổn định."],correct:2},
+{q:"Câu 27. Ngành dầu khí",a:["Thu hút vốn nước ngoài.","Đủ dùng.","Lạc hậu.","Miền Bắc."],correct:0},
+{q:"Câu 28. Suy giảm sinh vật",a:["Chất lượng rừng giảm.","Loài mới.","Phân bố rộng.","Tăng rừng."],correct:0},
+{q:"Câu 29. Vùng nuôi thủy sản lớn nhất",a:["Đồng bằng sông Hồng.","Đông Nam Bộ.","Bắc Trung Bộ.","Đồng bằng sông Cửu Long."],correct:3},
+{q:"Câu 30. Nhân tố ảnh hưởng khu công nghiệp",a:["Đặc điểm nguồn lao động.","Cách mạng công nghiệp.","Biến động thị trường.","Cơ sở vật chất kĩ thuật."],correct:1}
 ];
 
-let i=0,score=0,selected=-1;
+let i=0,score=0,locked=false;
 
 function startQuiz(){
  document.getElementById("popup").style.display="none";
@@ -165,38 +158,48 @@ function load(){
  });
  document.getElementById("quiz").innerHTML=html;
  document.getElementById("bar").style.width=(i/questions.length*100)+"%";
+ locked=false;
 }
 
 function choose(j,el){
- selected=j;
- document.querySelectorAll(".answer").forEach(e=>e.classList.remove("active"));
- el.classList.add("active");
+ if(locked) return;
+ locked=true;
+ let ans=document.querySelectorAll(".answer");
+ ans.forEach(a=>a.classList.add("disabled"));
+
+ if(j===questions[i].correct){
+   el.classList.add("correct");
+   document.getElementById("ting").play();
+   score++;
+ }else{
+   el.classList.add("wrong");
+   ans[questions[i].correct].classList.add("correct");
+   document.getElementById("wrong").play();
+ }
 }
 
 function next(){
- if(selected==-1){alert("Chọn đáp án!");return;}
- let answers=document.querySelectorAll(".answer");
- let correct=questions[i].a[questions[i].correct];
-
- if(answers[selected].innerText!==correct){
-   answers[selected].classList.add("wrong");
-   document.getElementById("wrong").play();
-   return;
+ if(!locked){alert("Bạn chưa chọn đáp án!");return;}
+ i++;
+ if(i<questions.length){
+   load();
+ }else{
+   document.getElementById("quiz").innerHTML="";
+   document.getElementById("bar").style.width="100%";
+   document.getElementById("result").innerHTML=
+     `🎉 Hoàn thành bài thi<br>Điểm: <b>${score}/${questions.length}</b>`;
+   document.getElementById("restartBtn").style.display="block";
+   document.getElementById("nextBtn").style.display="none";
  }
+}
 
- answers[selected].classList.add("correct");
- document.getElementById("ting").play();
- score++;
-
- setTimeout(()=>{
-   i++; selected=-1;
-   if(i<questions.length) load();
-   else{
-     document.getElementById("quiz").innerHTML="";
-     document.getElementById("result").innerHTML=
-     `🎉 Hoàn thành bài thi<br>Điểm: <b>${score}/30</b>`;
-   }
- },500);
+function restart(){
+ i=0;
+ score=0;
+ document.getElementById("result").innerHTML="";
+ document.getElementById("restartBtn").style.display="none";
+ document.getElementById("nextBtn").style.display="block";
+ load();
 }
 </script>
 </body>
