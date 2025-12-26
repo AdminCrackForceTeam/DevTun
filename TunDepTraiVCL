@@ -1,34 +1,202 @@
-#Bản Quyền Thuộc Về : Tun Luxury
-# Zalo : 0378099746
-bypass-system = true
-skip-proxy = *.local, *.crashlytics.com
-tun-excluded-routes = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bài kiểm tra Địa Lí</title>
 
-[Rule]
-AND,((DOMAIN-SUFFIX,googlevideo.com), (PROTOCOL,UDP)),REJECT
-AND,((DOMAIN,youtubei.googleapis.com), (PROTOCOL,UDP)),REJECT
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#2196f3,#00bcd4);
+    margin:0;
+}
+.box{
+    max-width:720px;
+    margin:20px auto;
+    background:white;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 4px 15px rgba(0,0,0,.3);
+}
+h2{text-align:center;color:#1565c0}
+input{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    margin-bottom:10px;
+}
+.progress{
+    height:8px;
+    background:#ddd;
+    border-radius:6px;
+    overflow:hidden;
+}
+.bar{
+    height:100%;
+    width:0%;
+    background:#1e88e5;
+    transition:.3s;
+}
+.answer{
+    border:1px solid #ccc;
+    padding:10px;
+    border-radius:6px;
+    margin:8px 0;
+    cursor:pointer;
+}
+.answer:hover{background:#e3f2fd}
+.answer.active{background:#1e88e5;color:white}
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    background:#1e88e5;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+}
+#result{
+    text-align:center;
+    font-size:18px;
+    margin-top:15px;
+    font-weight:bold;
+}
 
-[URL Rewrite]
-(^https?://[\w-]+\.googlevideo\.com/(?!dclk_video_ads).+?)&ctier=L(&.+?),ctier,(.+) $1$2$3 302
-^https?://[\w-]+\.googlevideo\.com/(?!(dclk_video_ads|videoplayback?)).+&oad _ reject-200
-^https?://(www|s)\.youtube\.com/api/stats/ads _ reject-200
-^https?://(www|s)\.youtube\.com/(pagead|ptracking) _ reject-200
-^https?://s\.youtube\.com/api/stats/qoe\?adcontext _ reject-200
+/* Popup chào */
+#popup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+}
+.popup-box{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    text-align:center;
+    max-width:320px;
+    animation: zoom .4s ease;
+}
+.popup-box h3{color:#1565c0}
+.close{
+    position:absolute;
+    right:15px;
+    top:10px;
+    font-size:22px;
+    cursor:pointer;
+}
+@keyframes zoom{
+    from{transform:scale(.5);opacity:0}
+    to{transform:scale(1);opacity:1}
+}
+</style>
+</head>
 
-[MITM]
-hostname = %APPEND% api.revenuecat.com, buy.itunes.apple.com, api.picsart.com, us-central1-alight-creative.cloudfunctions.net, api.adapty.io, carrotweather.herokuapp.com, lcs-mobile-cops.adobe.io, order.creativeappnow.com, api.mwm-users.com, us-central1-muslim-pro-app.cloudfunctions.net, api.gptkeyboard.app, prod.studysmarter.de, api.qonversion.io, api.blinkist.com, subscription.grammarly.com, api.esound.app, api.purchasely.io, spclient.wg.spotify.com, api-sub.meitu.com, redirector*.googlevideo.com, *.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com, api-mobile.soundcloud.com, photos.adobe.io
+<body>
 
-[Script]
-revenuecat = type=http-response, pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts$|subscribers\/[^/]+$), script-path=https://raw.githubusercontent.com/dhungx/modules-shadowrocket/refs/heads/main/js/locket/Locket.js, requires-body=true, max-size=-1, timeout=60
-deleteHeader = type=http-request, pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers), script-path=https://raw.githubusercontent.com/dhungx/modules-shadowrocket/refs/heads/main/js/locket/deleteHeader.js, timeout=60
-http-response ^https://api\.revenuecat\.com/.+/(receipts$|subscribers/[^/]+$) script-path=https://raw.githubusercontent.com/quocchienn/Make/refs/heads/crack/crack.js, requires-body=true, timeout=5, tag=Crack
-http-request ^https://api.revenuecat.com/.+/(receipts$|subscribers/?(.*?)*$) script-path=https://raw.githubusercontent.com/quocchienn/Make/refs/heads/crack/VSCO.js, requires-body=true, timeout=5, tag=VSCO
-http-request https://api.picsart.com/gw-v2/shop/subscription/apple/purchases script-path=https://raw.githubusercontent.com/quocchienn/Make/refs/heads/crack/PicsArt.js, requires-body=true, timeout=5, tag=PicsArt
-http-response https://us-central1-alight-creative.cloudfunctions.net/getAccountStatusAndLicenses script-path=https://raw.githubusercontent.com/quocchienn/Make/refs/heads/crack/AlightMotion.js, requires-body=true, timeout=5, tag=Alight Motion
-http-response https://api.sandbox.love/accounts/current script-path=https://raw.githubusercontent.com/quocchienn/Make/refs/heads/crack/SandBox.js, requires-body=true, timeout=5, tag=Sandbox Pixel Art
-youtube.response = type=http-response,pattern=^https://youtubei\.googleapis\.com/youtubei/v1/(browse|next|player|search|reel/reel_watch_sequence|guide|account/get_setting|get_watch),requires-body=1,max-size=-1,binary-body-mode=1,engine=script,script-path=https://raw.githubusercontent.com/dhungx/modules-shadowrocket/refs/heads/main/js/Yt/youtube.response.preview.js,argument="{\"lyricLang\":\"{{{ngôn ngữ dịch lời bài hát}}}\",\"captionLang\":\"{{{ngôn ngữ dịch phụ đề}}}\",\"blockUpload\":{{{chặn nút tải lên}}},\"blockImmersive\":{{{chặn nút chọn đoạn}}},\"debug\":{{{kích hoạt chế độ gỡ lỗi}}}}"
-spotify-json = type=http-request,type=http-request,pattern=^https:\/\/spclient\.wg\.spotify\.com\/(artistview\/v1\/artist|album-entity-view\/v2\/album)\/,requires-body=0,script-path=https://raw.githubusercontent.com/quocchienn/Make/refs/heads/crack/spotify-json.js
-spotify-proto = type=http-response,pattern=^https:\/\/spclient\.wg\.spotify\.com\/(bootstrap\/v1\/bootstrap|user-customization-service\/v1\/customize)$,requires-body=1,binary-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/quocchienn/Make/refs/heads/crack/spotify-proto.js,script-update-interval=0
-WinkVipCrack.js=type=http-response,pattern=^https?:\/\/api-sub\.meitu\.com\/v2\/user\/vip_info_by_group\.json,requires-body=1,script-path=https://raw.githubusercontent.com/quocchienn/co_tien_khong/refs/heads/Module/WinkVipCrack.js
-SoundCloudGo+=type=http-response,pattern=https://api-mobile.soundcloud.com/configuration/ios,requires-body=1,script-path=https://raw.githubusercontent.com/Marol62926/MarScrpt/main/soundcloud.js
-LightRoom=type=http-response,pattern=^https:\/\/photos\.adobe\.io\/v2\/accounts*,requires-body=1,script-path=https://raw.githubusercontent.com/litieyin/AD_VIP/main/Script/lightroom.js
+<!-- Popup chào -->
+<div id="popup">
+  <div class="popup-box">
+    <div class="close" onclick="closePopup()">✖</div>
+    <h3>🎉 Chào mừng bạn!</h3>
+    <p>Chúc bạn làm bài thật tốt 💯</p>
+    <button onclick="closePopup()">Bắt đầu làm bài</button>
+  </div>
+</div>
+
+<div class="box">
+<h2>KIỂM TRA ĐỊA LÍ</h2>
+<input id="name" placeholder="Nhập tên học sinh">
+
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div id="quiz"></div>
+
+<button onclick="next()">Tiếp theo</button>
+<div id="result"></div>
+</div>
+
+<!-- Âm thanh -->
+<audio id="ting" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="start" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
+
+<script>
+document.getElementById("start").play();
+
+function closePopup(){
+ document.getElementById("popup").style.display="none";
+}
+
+const questions = [
+{q:"Câu 1. Vùng nào có diện tích trồng cà phê lớn nhất?",a:["Trung du và miền núi phía Bắc","Đồng bằng sông Hồng","Bắc Trung Bộ","Nam Trung Bộ"],correct:3},
+{q:"Câu 2. Vùng trồng cao su lớn nhất?",a:["Trung du và miền núi phía Bắc","Đông Nam Bộ","Bắc Trung Bộ","ĐBSCL"],correct:1},
+{q:"Câu 3. Gió mùa hạ chủ yếu hướng nào?",a:["Tây Nam","Đông Bắc","Tây Bắc","Đông Nam"],correct:0},
+{q:"Câu 4. Vùng nuôi vịt nhiều nhất?",a:["Bắc Trung Bộ","Nam Trung Bộ","ĐBSH","ĐBSCL"],correct:3},
+{q:"Câu 5. Vùng nuôi trâu nhiều nhất?",a:["TDMNPB","Nam Trung Bộ","ĐBSH","Đông Nam Bộ"],correct:0},
+{q:"Câu 6. Đặc điểm đô thị hóa nước ta?",a:["Tốc độ nhanh","Tỉ lệ dân tăng","Hạn chế lối sống","Không có TP"],correct:1},
+{q:"Câu 7. Nguyên nhân CNTP đa dạng?",a:["Nguyên liệu phong phú","Lao động cao","Kĩ thuật tốt","Nhiều thành phần"],correct:0},
+{q:"Câu 8. Công nghiệp chuyển dịch theo hướng?",a:["Trong nước","Nâng cao công nghệ","Khai khoáng","Chiều rộng"],correct:1},
+{q:"Câu 9. Khí hậu Nam Trung Bộ – Nam Bộ?",a:["Ôn hòa","Khô quanh năm","Mưa – khô rõ","Nóng ẩm"],correct:2},
+{q:"Câu 10. Mục đích xây KCN?",a:["Thu hút FDI","Hợp tác CN","Tiêu dùng","Phân hóa lãnh thổ"],correct:0},
+{q:"Câu 11. Mục đích chuyển dịch CN?",a:["Khai thác thế mạnh","Phát triển đều","Hội nhập","Việc làm"],correct:0},
+{q:"Câu 12. Cơ cấu ngành thể hiện ở?",a:["Số ngành","Quan hệ ngành","Tỉ trọng ngành","Phân chia"],correct:2},
+{q:"Câu 13. Suy thoái đất đồng bằng?",a:["Đa dạng đất","Phù sa","Xói mòn","Nhiễm mặn"],correct:3},
+{q:"Câu 14. Vai trò xã hội KCN?",a:["Chuyển dịch KT","Thu hút vốn","Xuất khẩu","Chuyển dịch LĐ"],correct:3},
+{q:"Câu 15. Đô thị hóa nước ta?",a:["Chậm","Cao","Nhanh","Tỉ lệ lớn"],correct:0},
+{q:"Câu 16. Đông Nam Bộ CN cao vì?",a:["Giá trị cao","Quy mô lớn","Nhiều KCN","Công nghệ cao"],correct:2},
+{q:"Câu 17. Địa hình Tây Bắc – Bắc Trung Bộ?",a:["Thảo nguyên","Cao nguyên","ĐB hẹp","Đồi thấp"],correct:2},
+{q:"Câu 18. Khác KCN & điểm CN?",a:["Không dân cư","Không đều","Vị trí tốt","Không ranh giới"],correct:0},
+{q:"Câu 19. Vùng nuôi lợn nhiều?",a:["Nam Trung Bộ","Bắc Trung Bộ","ĐBSH","Đông Nam Bộ"],correct:2},
+{q:"Câu 20. KCN công nghệ cao giúp?",a:["Tăng sản lượng","Đa dạng","Tăng chất lượng","Giảm phụ thuộc"],correct:2},
+{q:"Câu 21. Xu hướng chăn nuôi?",a:["SP không giết","Dịch vụ","Đa dạng","Ứng dụng KHKT"],correct:3},
+{q:"Câu 22. Gió mùa đông?",a:["Đông Nam","Tây Bắc","Tây Nam","Đông Bắc"],correct:3},
+{q:"Câu 23. CN chuyển dịch theo?",a:["Chế biến","Giảm cao cấp","Chất lượng thấp","Khai thác"],correct:0},
+{q:"Câu 24. Tăng lương thực?",a:["Khai hoang","Thâm canh","Đa dạng","VAC"],correct:1},
+{q:"Câu 25. Sai về KT Nhà nước?",a:["Giảm tỉ trọng","Chủ đạo","Quản lí","Ổn định"],correct:3},
+{q:"Câu 26. Vai trò FDI?",a:["Cao nhất GDP","Chủ đạo","Giá trị tăng","Ổn định"],correct:2},
+{q:"Câu 27. Ngành dầu khí?",a:["Thu hút FDI","Đủ nhu cầu","Lạc hậu","Miền Bắc"],correct:0},
+{q:"Câu 28. Suy giảm sinh vật?",a:["Rừng giảm","Loài mới","Rộng","Tăng rừng"],correct:0},
+{q:"Câu 29. Nuôi thủy sản nhiều?",a:["ĐBSH","Đông Nam Bộ","Bắc Trung Bộ","ĐBSCL"],correct:3},
+{q:"Câu 30. Tác động KCN?",a:["Lao động","Cách mạng CN","Thị trường","CSVC"],correct:1},
+];
+
+let i=0,score=0,selected=-1;
+
+function load(){
+ let q=questions[i];
+ let html=`<b>${q.q}</b>`;
+ q.a.forEach((x,j)=>{
+   html+=`<div class="answer" onclick="choose(${j},this)">${x}</div>`;
+ });
+ document.getElementById("quiz").innerHTML=html;
+ document.getElementById("bar").style.width=(i/questions.length*100)+"%";
+}
+
+function choose(j,el){
+ selected=j;
+ document.querySelectorAll(".answer").forEach(e=>e.classList.remove("active"));
+ el.classList.add("active");
+}
+
+function next(){
+ if(selected==-1){alert("Vui lòng chọn đáp án!");return;}
+ if(selected===questions[i].correct){
+   document.getElementById("ting").play();
+   score++;
+ }
+ i++; selected=-1;
+ if(i<questions.length) load();
+ else{
+   document.getElementById("quiz").innerHTML="";
+   document.getElementById("result").innerHTML=`🎉 Hoàn thành!<br>Điểm: <b>${score}/30</b>`;
+ }
+}
+load();
+</script>
+</body>
+</html>
