@@ -2,13 +2,13 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Phòng Thi Online</title>
 <style>
 body{margin:0;font-family:Arial;background:linear-gradient(135deg,#0d47a1,#00acc1)}
 .box{max-width:1000px;margin:20px auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 0 20px rgba(0,0,0,.3)}
 h2{text-align:center;color:#0d47a1}
-button{width:100%;padding:12px;margin:6px 0;border:none;border-radius:8px;background:#1976d2;color:white;font-size:16px}
+button{width:100%;padding:12px;margin:6px 0;border:none;border-radius:8px;background:#1976d2;color:white}
 button:hover{background:#0d47a1}
 input,select,textarea{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:1px solid #ccc}
 .answer{border:1px solid #ccc;padding:10px;margin:6px 0;border-radius:6px;cursor:pointer}
@@ -18,19 +18,19 @@ input,select,textarea{width:100%;padding:10px;margin:5px 0;border-radius:6px;bor
 .hidden{display:none}
 .progress{height:10px;background:#ddd;border-radius:5px;overflow:hidden}
 .bar{height:100%;background:#1976d2;width:0%}
-.timer{color:red;font-weight:bold;text-align:center}
 table{width:100%;border-collapse:collapse}
 th,td{border:1px solid #ccc;padding:6px;text-align:center}
 th{background:#1976d2;color:white}
 </style>
 </head>
+
 <body>
 
 <div class="box" id="home">
 <h2>🏫 PHÒNG THI ONLINE</h2>
-<button onclick="goTeacher()">👨‍🏫 Giáo viên</button>
-<button onclick="goStudent()">👨‍🎓 Học sinh</button>
-<button onclick="goSupport()">🆘 Hỗ trợ</button>
+<button onclick="openTeacher()">👨‍🏫 Giáo viên</button>
+<button onclick="openStudent()">👨‍🎓 Học sinh</button>
+<button onclick="openSupport()">🆘 Hỗ trợ</button>
 </div>
 
 <!-- LOGIN -->
@@ -43,13 +43,13 @@ th{background:#1976d2;color:white}
 
 <!-- TEACHER -->
 <div class="box hidden" id="teacher">
-<h2>👨‍🏫 Quản lý đề</h2>
+<h2>👨‍🏫 Quản lý</h2>
 
 <select id="subject">
 <option value="toan">Toán</option>
 <option value="van">Ngữ văn</option>
-<option value="anh">Tiếng Anh</option>
-<option value="ly">Vật lý</option>
+<option value="anh">Anh</option>
+<option value="ly">Lý</option>
 <option value="hoa">Hóa</option>
 <option value="sinh">Sinh</option>
 <option value="su">Sử</option>
@@ -68,11 +68,11 @@ th{background:#1976d2;color:white}
 <option value="3">Đúng D</option>
 </select>
 
-<button onclick="addQ()">➕ Thêm câu hỏi</button>
-<button onclick="showQ()">📄 Xem câu hỏi</button>
+<button onclick="addQ()">➕ Thêm câu</button>
+<button onclick="showQ()">📄 Câu hỏi</button>
 <button onclick="showResult()">📊 Kết quả</button>
-<button onclick="showSupport()">📨 Tin hỗ trợ</button>
-<button onclick="clearAll()">🗑 Xoá tất cả</button>
+<button onclick="showSupport()">📨 Hỗ trợ</button>
+<button onclick="clearAll()">🗑 Xóa dữ liệu</button>
 <button onclick="back()">⬅ Quay lại</button>
 
 <div id="output"></div>
@@ -85,15 +85,14 @@ th{background:#1976d2;color:white}
 <select id="sub">
 <option value="toan">Toán</option>
 <option value="van">Ngữ văn</option>
-<option value="anh">Tiếng Anh</option>
-<option value="ly">Vật lý</option>
+<option value="anh">Anh</option>
+<option value="ly">Lý</option>
 <option value="hoa">Hóa</option>
 <option value="sinh">Sinh</option>
 <option value="su">Sử</option>
 </select>
 <button onclick="start()">▶ Bắt đầu</button>
 
-<div class="timer" id="timer"></div>
 <div class="progress"><div class="bar" id="bar"></div></div>
 <div id="quiz"></div>
 <button onclick="next()">Tiếp theo</button>
@@ -102,20 +101,20 @@ th{background:#1976d2;color:white}
 
 <!-- SUPPORT -->
 <div class="box hidden" id="support">
-<h2>🆘 Hỗ trợ kỹ thuật</h2>
+<h2>🆘 Gửi hỗ trợ</h2>
 <input id="sp_name" placeholder="Tên của bạn">
-<textarea id="sp_msg" placeholder="Nội dung cần hỗ trợ..."></textarea>
-<button onclick="sendSupport()">📩 Gửi hỗ trợ</button>
+<textarea id="sp_msg" placeholder="Nội dung cần hỗ trợ"></textarea>
+<button onclick="sendSupport()">📨 Gửi</button>
 <button onclick="back()">⬅ Quay lại</button>
 </div>
 
 <script>
 const PASS="14032008";
-let list=[],i=0,score=0,time=600,selected=false,violations=0,timer;
+let list=[],i=0,score=0,selected=false;
 
-function goTeacher(){home.classList.add("hidden");login.classList.remove("hidden")}
-function goStudent(){home.classList.add("hidden");student.classList.remove("hidden")}
-function goSupport(){home.classList.add("hidden");support.classList.remove("hidden")}
+function openTeacher(){home.classList.add("hidden");login.classList.remove("hidden")}
+function openStudent(){home.classList.add("hidden");student.classList.remove("hidden")}
+function openSupport(){home.classList.add("hidden");support.classList.remove("hidden")}
 function back(){location.reload()}
 
 function login(){
@@ -138,11 +137,10 @@ output.innerHTML=d.map((x,i)=>`${i+1}. ${x.q}`).join("<br>");
 }
 
 function start(){
-if(name.value=="") return alert("Nhập tên!");
+if(name.value.trim()=="") return alert("Bạn phải nhập tên!");
 list=JSON.parse(localStorage.getItem(sub.value)||"[]");
 if(!list.length) return alert("Chưa có câu hỏi!");
-i=0;score=0;time=600;violations=0;
-timerRun();
+i=0;score=0;
 load();
 }
 
@@ -171,50 +169,11 @@ else finish();
 }
 
 function finish(){
-clearInterval(timer);
 let r=JSON.parse(localStorage.getItem("result")||"[]");
 r.push({name:name.value,subject:sub.value,score:score+"/"+list.length,time:new Date().toLocaleString()});
 localStorage.setItem("result",JSON.stringify(r));
 quiz.innerHTML="";
 result.innerHTML=`🎉 Hoàn thành<br>Điểm: ${score}/${list.length}`;
-}
-
-function timerRun(){
-timer=setInterval(()=>{
-time--;
-timer.innerHTML="⏱ "+time+"s";
-if(time<=0) finish();
-},1000);
-}
-
-/* CHỐNG THOÁT TAB */
-document.addEventListener("visibilitychange",()=>{
-if(document.hidden){
-violations++;
-alert("⚠ Không được thoát khỏi bài thi!");
-if(violations>=3) finish();
-}
-});
-
-/* SUPPORT */
-function sendSupport(){
-let s=JSON.parse(localStorage.getItem("support")||"[]");
-s.push({
-name:sp_name.value,
-msg:sp_msg.value,
-time:new Date().toLocaleString()
-});
-localStorage.setItem("support",JSON.stringify(s));
-alert("Đã gửi hỗ trợ!");
-sp_name.value="";
-sp_msg.value="";
-}
-
-function showSupport(){
-let s=JSON.parse(localStorage.getItem("support")||"[]");
-let html="<table><tr><th>Tên</th><th>Nội dung</th><th>Thời gian</th></tr>";
-s.forEach(x=>html+=`<tr><td>${x.name}</td><td>${x.msg}</td><td>${x.time}</td></tr>`);
-output.innerHTML=html+"</table>";
 }
 
 function showResult(){
@@ -224,10 +183,25 @@ d.forEach(x=>html+=`<tr><td>${x.name}</td><td>${x.subject}</td><td>${x.score}</t
 output.innerHTML=html+"</table>";
 }
 
+function sendSupport(){
+let s=JSON.parse(localStorage.getItem("support")||"[]");
+s.push({name:sp_name.value,msg:sp_msg.value,time:new Date().toLocaleString()});
+localStorage.setItem("support",JSON.stringify(s));
+alert("Đã gửi!");
+sp_name.value="";sp_msg.value="";
+}
+
+function showSupport(){
+let s=JSON.parse(localStorage.getItem("support")||"[]");
+let html="<table><tr><th>Tên</th><th>Nội dung</th><th>Thời gian</th></tr>";
+s.forEach(x=>html+=`<tr><td>${x.name}</td><td>${x.msg}</td><td>${x.time}</td></tr>`);
+output.innerHTML=html+"</table>";
+}
+
 function clearAll(){
-if(confirm("Xoá toàn bộ dữ liệu?")){
+if(confirm("Xóa toàn bộ dữ liệu?")){
 localStorage.clear();
-alert("Đã xoá xong!");
+alert("Đã xóa!");
 }
 }
 </script>
