@@ -3,25 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hệ Thống Trắc Nghiệm </title>
+<title>Hệ Thống Trắc Nghiệm Full Xịn</title>
 <style>
 body{margin:0;font-family:Arial,sans-serif;background: linear-gradient(135deg,#2196f3,#00bcd4);color:#333;}
 .box{max-width:900px;margin:20px auto;background:white;padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.3);position:relative;}
-h2{text-align:center;color:#1565c0;margin-bottom:20px}
+header{background:rgba(0,0,0,0.05);padding:10px;margin-bottom:20px;border-radius:10px;text-align:center;font-size:18px;font-weight:bold;}
 button{width:100%;padding:12px;border:none;border-radius:8px;background:#1e88e5;color:white;font-size:16px;margin:6px 0;cursor:pointer;transition:0.3s}
 button:hover{background:#1565c0}
 input,select{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px solid #ccc;}
-.answer{border:1px solid #ccc;padding:10px;margin:6px 0;border-radius:6px;cursor:pointer;transition:0.2s;}
-.answer:hover{background:#e3f2fd; transform:scale(1.02);}
-.correct{background:#43a047;color:white}
-.wrong{background:#e53935;color:white}
-.progress{height:10px;background:#ddd;border-radius:6px;overflow:hidden;margin:10px 0;}
-.bar{height:100%;background:#1e88e5;width:0%}
-.hidden{display:none}
+.answer{border:1px solid #ccc;padding:12px;margin:8px 0;border-radius:8px;cursor:pointer;transition:0.2s;box-shadow:1px 1px 5px rgba(0,0,0,0.1);}
+.answer:hover{background:#e3f2fd;transform:scale(1.02);}
+.correct{background:#43a047;color:white;}
+.wrong{background:#e53935;color:white;}
+.progress{height:12px;background:#ddd;border-radius:6px;overflow:hidden;margin:10px 0;}
+.bar{height:100%;background:#1e88e5;width:0%;transition:0.3s;}
+.hidden{display:none;}
 .list{background:#f5f5f5;padding:8px;margin:6px 0;border-radius:6px;display:flex;justify-content:space-between;align-items:center;box-shadow:1px 1px 5px rgba(0,0,0,0.1);}
-header{background:rgba(0,0,0,0.05);padding:10px;margin-bottom:20px;border-radius:10px;text-align:center;font-size:18px;font-weight:bold;}
-hr{margin:20px 0;}
-table{width:100%;border-collapse:collapse;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
 table,th,td{border:1px solid #ccc;}
 th,td{padding:8px;text-align:left;}
 th{background:#1e88e5;color:white;}
@@ -72,6 +70,7 @@ th{background:#1e88e5;color:white;}
 </select>
 <button onclick="addQuestion()">➕ Lưu câu hỏi</button>
 <button onclick="loadList()">📄 Xem / Xoá câu hỏi</button>
+<button onclick="exportCSV()">💾 Xuất CSV điểm</button>
 
 <hr>
 <h3>📂 Import đề cương</h3>
@@ -109,7 +108,7 @@ th{background:#1e88e5;color:white;}
 <option value="dia">📔 Địa</option>
 <option value="vatly">📒 Vật Lý</option>
 </select>
-<button onclick="startQuiz()">▶ Bắt đầu</button>
+<button onclick="startQuiz()" id="startBtn">▶ Bắt đầu</button>
 <div class="progress"><div class="bar" id="bar"></div></div>
 <div id="quiz"></div>
 <button onclick="next()" id="nextBtn">Tiếp theo</button>
@@ -135,6 +134,7 @@ function backMenu(){
     document.getElementById("bar").style.width="0%";
     document.getElementById("backStudent").classList.add("hidden");
     document.getElementById("nextBtn").classList.remove("hidden");
+    document.getElementById("startBtn").style.display="block";
 }
 
 // ===== GIÁO VIÊN =====
@@ -166,7 +166,6 @@ function loadList(){
 
 function del(index){let data=getData(); data.splice(index,1); saveData(data); loadList();}
 
-// ===== IMPORT FILE JSON =====
 function importFile(){
   const file=document.getElementById("fileInput").files[0];
   if(!file){alert("Chọn file trước!"); return;}
@@ -179,7 +178,6 @@ function importFile(){
   reader.readAsText(file);
 }
 
-// ===== XEM ĐIỂM =====
 function loadScores(){
     let sub=document.getElementById("scoreSubject").value;
     let scores=JSON.parse(localStorage.getItem("score_"+sub)||"[]");
@@ -191,18 +189,34 @@ function loadScores(){
     html+="</table>"; div.innerHTML=html;
 }
 
+function exportCSV(){
+    let sub=document.getElementById("scoreSubject").value;
+    let scores=JSON.parse(localStorage.getItem("score_"+sub)||"[]");
+    if(scores.length===0){alert("Chưa có dữ liệu!"); return;}
+    let csv="Tên,Điểm,Tổng,Ngày giờ\n";
+    scores.forEach(s=>{csv+=`${s.name},${s.score},${s.total},${s.date}\n`;});
+    let blob=new Blob([csv],{type:"text/csv"});
+    let url=URL.createObjectURL(blob);
+    let a=document.createElement("a"); a.href=url; a.download=`diem_${sub}.csv`; a.click(); URL.revokeObjectURL(url);
+}
+
 // ===== HỌC SINH =====
 function openStudent(){menu.classList.add("hidden"); student.classList.remove("hidden"); document.getElementById("quiz").innerHTML=""; document.getElementById("result").innerHTML="";}
 
 function startQuiz(){
     studentName=document.getElementById("studentName").value.trim();
-    if(studentName===""){alert("Nhập tên học sinh trước!"); return;}
     let sub=document.getElementById("subChoose").value;
+    if(studentName===""){alert("Nhập tên học sinh trước!"); return;}
     if(localStorage.getItem("limit_"+sub) && localStorage.getItem("done_"+sub)){alert("Bạn chỉ được làm môn này 1 lần trên thiết bị này!"); return;}
     questions=JSON.parse(localStorage.getItem("quiz_"+sub)||"[]");
     if(questions.length===0){alert("Chưa có đề!"); return;}
-    i=0;score=0;selected=-1;
-    document.getElementById("backStudent").classList.add("hidden"); document.getElementById("nextBtn").classList.remove("hidden");
+    i=0; score=0; selected=-1;
+    document.getElementById("quiz").innerHTML="";
+    document.getElementById("bar").style.width="0%";
+    document.getElementById("backStudent").classList.add("hidden");
+    document.getElementById("nextBtn").classList.remove("hidden");
+    document.getElementById("result").innerHTML="";
+    document.getElementById("startBtn").style.display="none";
     loadQ();
 }
 
@@ -221,9 +235,12 @@ function next(){
         i++; selected=-1;
         if(i<questions.length) loadQ();
         else{
-            document.getElementById("quiz").innerHTML=""; document.getElementById("result").innerHTML=`🎉 Hoàn thành<br>Điểm: <b>${score}/${questions.length}</b>`;
-            document.getElementById("backStudent").classList.remove("hidden"); document.getElementById("nextBtn").classList.add("hidden");
+            document.getElementById("quiz").innerHTML="";
+            document.getElementById("result").innerHTML=`🎉 Hoàn thành<br>Điểm: <b>${score}/${questions.length}</b>`;
+            document.getElementById("backStudent").classList.remove("hidden");
+            document.getElementById("nextBtn").classList.add("hidden");
             document.getElementById("bar").style.width="100%";
+            document.getElementById("startBtn").style.display="block";
             saveStudentScore();
         }
     },600);
