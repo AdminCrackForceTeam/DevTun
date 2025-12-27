@@ -3,203 +3,239 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trắc nghiệm Địa Lí</title>
-
+<title>Hệ Thống Trắc Nghiệm </title>
 <style>
-body{
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg,#2196f3,#00bcd4);
-    margin:0;
-    overflow:hidden;
-}
-.box{
-    max-width:720px;
-    margin:20px auto;
-    background:white;
-    padding:20px;
-    border-radius:14px;
-    box-shadow:0 4px 15px rgba(0,0,0,.3);
-}
-h2{text-align:center;color:#1565c0}
-.progress{height:8px;background:#ddd;border-radius:6px;overflow:hidden}
-.bar{height:100%;width:0%;background:#1e88e5;transition:.3s}
-
-.answer{
-    border:1px solid #ccc;
-    padding:10px;
-    border-radius:6px;
-    margin:8px 0;
-    cursor:pointer;
-}
-.answer:hover{background:#e3f2fd}
-.answer.correct{background:#43a047;color:white}
-.answer.wrong{background:#e53935;color:white}
-.answer.disabled{pointer-events:none}
-
-button{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    background:#1e88e5;
-    color:white;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-}
-
-#result{text-align:center;font-size:18px;margin-top:15px;font-weight:bold}
-
-#popup{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.6);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-.popup-box{
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    text-align:center;
-}
-
-.snow{
-    position:fixed;
-    top:-10px;
-    color:white;
-    animation:fall linear infinite;
-}
-@keyframes fall{to{transform:translateY(110vh)}}
+body{margin:0;font-family:Arial,sans-serif;background: linear-gradient(135deg,#2196f3,#00bcd4);color:#333;}
+.box{max-width:900px;margin:20px auto;background:white;padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.3);position:relative;}
+h2{text-align:center;color:#1565c0;margin-bottom:20px}
+button{width:100%;padding:12px;border:none;border-radius:8px;background:#1e88e5;color:white;font-size:16px;margin:6px 0;cursor:pointer;transition:0.3s}
+button:hover{background:#1565c0}
+input,select{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px solid #ccc;}
+.answer{border:1px solid #ccc;padding:10px;margin:6px 0;border-radius:6px;cursor:pointer;transition:0.2s;}
+.answer:hover{background:#e3f2fd; transform:scale(1.02);}
+.correct{background:#43a047;color:white}
+.wrong{background:#e53935;color:white}
+.progress{height:10px;background:#ddd;border-radius:6px;overflow:hidden;margin:10px 0;}
+.bar{height:100%;background:#1e88e5;width:0%}
+.hidden{display:none}
+.list{background:#f5f5f5;padding:8px;margin:6px 0;border-radius:6px;display:flex;justify-content:space-between;align-items:center;box-shadow:1px 1px 5px rgba(0,0,0,0.1);}
+header{background:rgba(0,0,0,0.05);padding:10px;margin-bottom:20px;border-radius:10px;text-align:center;font-size:18px;font-weight:bold;}
+hr{margin:20px 0;}
+table{width:100%;border-collapse:collapse;}
+table,th,td{border:1px solid #ccc;}
+th,td{padding:8px;text-align:left;}
+th{background:#1e88e5;color:white;}
 </style>
 </head>
-
 <body>
 
-<div id="popup">
-  <div class="popup-box">
-    <h3>🎉 Chúc Lớp 12A10 thi Tốt!</h3>
-    <button onclick="startQuiz()">Bắt đầu</button>
-  </div>
+<!-- MENU -->
+<div class="box" id="menu">
+<header>📘 HỆ THỐNG TRẮC NGHIỆM CHUYÊN NGHIỆP</header>
+<button onclick="loginTeacher()">🧑‍🏫 GIÁO VIÊN</button>
+<button onclick="openStudent()">👨‍🎓 HỌC SINH</button>
 </div>
 
-<div class="box">
-<h2>KIỂM TRA ĐỊA LÍ</h2>
+<!-- LOGIN GIÁO VIÊN -->
+<div class="box hidden" id="login">
+<header>🔒 Đăng nhập giáo viên</header>
+<input type="password" id="pwd" placeholder="Nhập mật khẩu giáo viên">
+<button onclick="checkPwd()">Đăng nhập</button>
+<button onclick="backMenu()">⬅ Quay lại MENU</button>
+</div>
+
+<!-- GIÁO VIÊN -->
+<div class="box hidden" id="teacher">
+<header>🧑‍🏫 SOẠN ĐỀ / XEM ĐIỂM</header>
+
+<h3>📄 Quản lý câu hỏi</h3>
+<select id="subject">
+<option value="toan">📘 Toán</option>
+<option value="nguvan">📕 Ngữ Văn</option>
+<option value="hoa">📗 Hóa</option>
+<option value="sinh">📙 Sinh</option>
+<option value="su">📓 Sử</option>
+<option value="dia">📔 Địa</option>
+<option value="vatly">📒 Vật Lý</option>
+</select>
+<label><input type="checkbox" id="limitOnce"> Chỉ cho phép học sinh làm môn này 1 lần trên thiết bị</label>
+<input id="q" placeholder="Nhập câu hỏi">
+<input id="a1" placeholder="Đáp án A">
+<input id="a2" placeholder="Đáp án B">
+<input id="a3" placeholder="Đáp án C">
+<input id="a4" placeholder="Đáp án D">
+<select id="correct">
+<option value="0">Đúng: A</option>
+<option value="1">Đúng: B</option>
+<option value="2">Đúng: C</option>
+<option value="3">Đúng: D</option>
+</select>
+<button onclick="addQuestion()">➕ Lưu câu hỏi</button>
+<button onclick="loadList()">📄 Xem / Xoá câu hỏi</button>
+
+<hr>
+<h3>📂 Import đề cương</h3>
+<input type="file" id="fileInput" accept=".json">
+<button onclick="importFile()">📂 Import đề cương</button>
+
+<hr>
+<h3>📊 Điểm học sinh</h3>
+<select id="scoreSubject">
+<option value="toan">📘 Toán</option>
+<option value="nguvan">📕 Ngữ Văn</option>
+<option value="hoa">📗 Hóa</option>
+<option value="sinh">📙 Sinh</option>
+<option value="su">📓 Sử</option>
+<option value="dia">📔 Địa</option>
+<option value="vatly">📒 Vật Lý</option>
+</select>
+<button onclick="loadScores()">Xem điểm</button>
+<div id="scores"></div>
+
+<button onclick="backMenu()">⬅ Quay lại MENU</button>
+<div id="list"></div>
+</div>
+
+<!-- HỌC SINH -->
+<div class="box hidden" id="student">
+<header>📘 LÀM BÀI</header>
+<input id="studentName" placeholder="Nhập tên học sinh">
+<select id="subChoose">
+<option value="toan">📘 Toán</option>
+<option value="nguvan">📕 Ngữ Văn</option>
+<option value="hoa">📗 Hóa</option>
+<option value="sinh">📙 Sinh</option>
+<option value="su">📓 Sử</option>
+<option value="dia">📔 Địa</option>
+<option value="vatly">📒 Vật Lý</option>
+</select>
+<button onclick="startQuiz()">▶ Bắt đầu</button>
 <div class="progress"><div class="bar" id="bar"></div></div>
 <div id="quiz"></div>
-
-<button id="nextBtn" onclick="next()">Tiếp theo</button>
-<button id="restartBtn" onclick="restart()" style="display:none;background:#43a047">🔁 Làm lại bài</button>
-
+<button onclick="next()" id="nextBtn">Tiếp theo</button>
 <div id="result"></div>
+<button class="hidden" id="backStudent" onclick="backMenu()">⬅ Quay lại MENU</button>
 </div>
 
-<audio id="ting" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-<audio id="wrong" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+<audio id="ting" src="https://freesound.org/data/previews/341/341695_6261545-lq.mp3"></audio>
+<audio id="wrong" src="https://freesound.org/data/previews/456/456618_7037-lq.mp3"></audio>
 
 <script>
-function snow(){
- let s=document.createElement("div");
- s.className="snow";
- s.innerHTML="❄";
- s.style.left=Math.random()*window.innerWidth+"px";
- s.style.animationDuration=(3+Math.random()*5)+"s";
- document.body.appendChild(s);
- setTimeout(()=>s.remove(),8000);
+const teacherPwd="123456";
+let questions=[],i=0,score=0,selected=-1,studentName="";
+
+// ===== MENU =====
+function backMenu(){
+    menu.classList.remove("hidden");
+    login.classList.add("hidden");
+    teacher.classList.add("hidden");
+    student.classList.add("hidden");
+    document.getElementById("result").innerHTML="";
+    document.getElementById("quiz").innerHTML="";
+    document.getElementById("bar").style.width="0%";
+    document.getElementById("backStudent").classList.add("hidden");
+    document.getElementById("nextBtn").classList.remove("hidden");
 }
-setInterval(snow,200);
 
-let questions = [
-{q:"Câu 1. Vùng nào sau đây có diện tích trồng cây cà phê lớn nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Đồng bằng sông Hồng.","Bắc Trung Bộ.","Nam Trung Bộ."],correct:3},
-{q:"Câu 2. Vùng nào sau đây có diện tích trồng cây cao su lớn nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Đông Nam Bộ.","Bắc Trung Bộ.","Đồng bằng sông Cửu Long."],correct:1},
-{q:"Câu 3. Gió thổi tới nước ta vào mùa hạ chủ yếu có hướng",a:["Tây Nam.","Đông Bắc.","Tây Bắc.","Đông Nam."],correct:0},
-{q:"Câu 4. Vùng nào sau đây có số lượng đàn vịt nhiều nhất nước ta?",a:["Bắc Trung Bộ.","Nam Trung Bộ.","Đồng bằng sông Hồng.","Đồng bằng sông Cửu Long."],correct:3},
-{q:"Câu 5. Vùng nào sau đây có số lượng trâu nhiều nhất nước ta?",a:["Trung du và miền núi phía Bắc.","Nam Trung Bộ.","Đồng bằng sông Hồng.","Đông Nam Bộ."],correct:0},
-{q:"Câu 6. Phát biểu nào sau đây đúng với đặc điểm đô thị hóa ở nước ta?",a:["Tốc độ đô thị hóa nhanh.","Tỉ lệ dân thành thị tăng lên.","Hạn chế lối sống thành thị.","Không có các thành phố."],correct:1},
-{q:"Câu 7. Nguyên nhân chủ yếu khiến cơ cấu công nghiệp chế biến thực phẩm đa dạng?",a:["Nguồn nguyên liệu tại chỗ phong phú.","Có nguồn lao động được nâng cao tay nghề.","Cơ sở vật chất kĩ thuật được nâng cấp.","Nhiều thành phần kinh tế tham gia sản xuất."],correct:0},
-{q:"Câu 8. Cơ cấu ngành công nghiệp nước ta đang được cơ cấu lại theo hướng",a:["Chú trọng thị trường trong nước.","Nâng cao trình độ công nghệ.","Phát triển mạnh khai khoáng.","Phát triển theo chiều rộng."],correct:1},
-{q:"Câu 9. Khí hậu miền Nam Trung Bộ và Nam Bộ có đặc điểm",a:["Tính chất ôn hòa.","Khô hạn quanh năm.","Mùa mưa, khô rõ rệt.","Nóng, ẩm quanh năm."],correct:2},
-{q:"Câu 10. Nước ta xây dựng các khu công nghiệp chủ yếu nhằm mục đích",a:["Thu hút vốn đầu tư nước ngoài.","Tạo sự hợp tác giữa các ngành công nghiệp.","Sản xuất để phục vụ tiêu dùng.","Đẩy mạnh sự phân hóa lãnh thổ công nghiệp."],correct:0},
+// ===== GIÁO VIÊN =====
+function loginTeacher(){menu.classList.add("hidden"); login.classList.remove("hidden");}
+function checkPwd(){
+    if(document.getElementById("pwd").value===teacherPwd){
+        login.classList.add("hidden"); teacher.classList.remove("hidden");
+        document.getElementById("pwd").value="";
+    } else {alert("Sai mật khẩu!");}
+}
+function getData(){let sub=document.getElementById("subject").value; return JSON.parse(localStorage.getItem("quiz_"+sub)||"[]");}
+function saveData(data){let sub=document.getElementById("subject").value; localStorage.setItem("quiz_"+sub,JSON.stringify(data));
+if(document.getElementById("limitOnce").checked){localStorage.setItem("limit_"+sub,"true");} else {localStorage.removeItem("limit_"+sub);}}
 
-{q:"Câu 11. Cơ cấu công nghiệp theo lãnh thổ chuyển dịch nhằm",a:["Khai thác thế mạnh từng vùng.","Phát triển đồng đều.","Hội nhập quốc tế.","Giải quyết việc làm."],correct:0},
-{q:"Câu 12. Biểu hiện rõ nhất của cơ cấu công nghiệp theo ngành là",a:["Số lượng ngành.","Mối quan hệ ngành.","Tỉ trọng từng ngành.","Sự phân chia ngành."],correct:2},
-{q:"Câu 13. Suy thoái đất ở đồng bằng thể hiện ở",a:["Nhiều loại đất.","Phù sa bồi đắp.","Xói mòn.","Nhiễm mặn."],correct:3},
-{q:"Câu 14. Vai trò xã hội của khu công nghiệp là",a:["Chuyển dịch cơ cấu kinh tế.","Thu hút đầu tư.","Nâng cao xuất khẩu.","Chuyển dịch cơ cấu lao động."],correct:3},
-{q:"Câu 15. Đặc điểm đúng của đô thị hóa nước ta",a:["Tốc độ còn chậm.","Trình độ cao.","Diễn ra nhanh.","Tỉ lệ dân thành thị cao."],correct:0},
-{q:"Câu 16. Đông Nam Bộ tập trung công nghiệp cao vì",a:["Giá trị công nghiệp lớn.","KCN quy mô lớn.","Tập trung nhiều KCN.","Nhiều KCN công nghệ cao."],correct:2},
-{q:"Câu 17. Đặc điểm địa hình Tây Bắc – Bắc Trung Bộ",a:["Thảo nguyên.","Cao nguyên.","Đồng bằng ven biển hẹp.","Đồi núi thấp."],correct:2},
-{q:"Câu 18. Khác nhau giữa KCN và điểm CN là",a:["Không có dân cư.","Không đều lãnh thổ.","Vị trí thuận lợi.","Không ranh giới."],correct:0},
-{q:"Câu 19. Vùng có số lợn nhiều nhất",a:["Nam Trung Bộ.","Bắc Trung Bộ.","Đồng bằng sông Hồng.","Đông Nam Bộ."],correct:2},
-{q:"Câu 20. Khu công nghệ cao giúp",a:["Tăng sản lượng.","Đa dạng hóa.","Nâng cao chất lượng.","Giảm phụ thuộc."],correct:2},
-{q:"Câu 21. Xu hướng chăn nuôi hiện nay",a:["Tăng sản phẩm không giết thịt.","Phát triển dịch vụ.","Đa dạng đàn.","Ứng dụng khoa học kĩ thuật."],correct:3},
-{q:"Câu 22. Gió mùa đông thổi hướng",a:["Đông Nam.","Tây Bắc.","Tây Nam.","Đông Bắc."],correct:3},
-{q:"Câu 23. Cơ cấu công nghiệp chuyển theo hướng",a:["Tăng chế biến.","Giảm sản phẩm cao.","Tăng sản phẩm thấp.","Tăng khai thác."],correct:0},
-{q:"Câu 24. Tăng sản lượng lương thực bằng",a:["Khai hoang.","Thâm canh tăng vụ.","Đa dạng hóa.","VAC."],correct:1},
-{q:"Câu 25. Không đúng về kinh tế Nhà nước",a:["Tỉ trọng giảm.","Giữ vai trò chủ đạo.","Quản lí then chốt.","Giữ ổn định GDP."],correct:3},
-{q:"Câu 26. Vai trò FDI",a:["Cao nhất GDP.","Chủ đạo.","Giá trị tăng cao.","Ổn định."],correct:2},
-{q:"Câu 27. Ngành dầu khí",a:["Thu hút vốn nước ngoài.","Đủ dùng.","Lạc hậu.","Miền Bắc."],correct:0},
-{q:"Câu 28. Suy giảm sinh vật",a:["Chất lượng rừng giảm.","Loài mới.","Phân bố rộng.","Tăng rừng."],correct:0},
-{q:"Câu 29. Vùng nuôi thủy sản lớn nhất",a:["Đồng bằng sông Hồng.","Đông Nam Bộ.","Bắc Trung Bộ.","Đồng bằng sông Cửu Long."],correct:3},
-{q:"Câu 30. Nhân tố ảnh hưởng khu công nghiệp",a:["Đặc điểm nguồn lao động.","Cách mạng công nghiệp.","Biến động thị trường.","Cơ sở vật chất kĩ thuật."],correct:1}
-];
+function addQuestion(){
+    let data=getData();
+    let qVal=document.getElementById("q").value,a1=document.getElementById("a1").value,a2=document.getElementById("a2").value,a3=document.getElementById("a3").value,a4=document.getElementById("a4").value;
+    if(!qVal||!a1||!a2||!a3||!a4){alert("Vui lòng nhập đầy đủ!"); return;}
+    data.push({q:qVal,a:[a1,a2,a3,a4],c:parseInt(document.getElementById("correct").value)});
+    saveData(data); alert("Đã lưu!");
+    document.getElementById("q").value=document.getElementById("a1").value=document.getElementById("a2").value=document.getElementById("a3").value=document.getElementById("a4").value="";
+}
 
-let i=0,score=0,locked=false;
+function loadList(){
+    let data=getData(); let listDiv=document.getElementById("list"); listDiv.innerHTML="";
+    if(data.length===0){listDiv.innerHTML="Chưa có câu hỏi!"; return;}
+    data.forEach((x,index)=>{let div=document.createElement("div"); div.className="list"; div.innerHTML=`<span>${index+1}. ${x.q}</span><button onclick="del(${index})">❌ Xoá</button>`; listDiv.appendChild(div);});
+}
+
+function del(index){let data=getData(); data.splice(index,1); saveData(data); loadList();}
+
+// ===== IMPORT FILE JSON =====
+function importFile(){
+  const file=document.getElementById("fileInput").files[0];
+  if(!file){alert("Chọn file trước!"); return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{ const data=JSON.parse(e.target.result); if(!Array.isArray(data)) throw "File không hợp lệ";
+        let current=getData(); current=current.concat(data); saveData(current); alert("Import thành công "+data.length+" câu!"); loadList();
+    }catch(err){alert("File không hợp lệ: "+err);}
+  }
+  reader.readAsText(file);
+}
+
+// ===== XEM ĐIỂM =====
+function loadScores(){
+    let sub=document.getElementById("scoreSubject").value;
+    let scores=JSON.parse(localStorage.getItem("score_"+sub)||"[]");
+    let div=document.getElementById("scores");
+    if(scores.length===0){div.innerHTML="Chưa có học sinh nào làm bài."; return;}
+    scores.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    let html="<table><tr><th>Tên</th><th>Điểm</th><th>Tổng</th><th>Ngày giờ</th></tr>";
+    scores.forEach(s=>{html+=`<tr><td>${s.name}</td><td>${s.score}</td><td>${s.total}</td><td>${s.date}</td></tr>`;});
+    html+="</table>"; div.innerHTML=html;
+}
+
+// ===== HỌC SINH =====
+function openStudent(){menu.classList.add("hidden"); student.classList.remove("hidden"); document.getElementById("quiz").innerHTML=""; document.getElementById("result").innerHTML="";}
 
 function startQuiz(){
- document.getElementById("popup").style.display="none";
- load();
+    studentName=document.getElementById("studentName").value.trim();
+    if(studentName===""){alert("Nhập tên học sinh trước!"); return;}
+    let sub=document.getElementById("subChoose").value;
+    if(localStorage.getItem("limit_"+sub) && localStorage.getItem("done_"+sub)){alert("Bạn chỉ được làm môn này 1 lần trên thiết bị này!"); return;}
+    questions=JSON.parse(localStorage.getItem("quiz_"+sub)||"[]");
+    if(questions.length===0){alert("Chưa có đề!"); return;}
+    i=0;score=0;selected=-1;
+    document.getElementById("backStudent").classList.add("hidden"); document.getElementById("nextBtn").classList.remove("hidden");
+    loadQ();
 }
 
-function load(){
- let q=questions[i];
- let html=`<b>${q.q}</b>`;
- q.a.forEach((x,j)=>{
-   html+=`<div class="answer" onclick="choose(${j},this)">${x}</div>`;
- });
- document.getElementById("quiz").innerHTML=html;
- document.getElementById("bar").style.width=(i/questions.length*100)+"%";
- locked=false;
-}
+function loadQ(){let q=questions[i]; let quizDiv=document.getElementById("quiz"); quizDiv.innerHTML=`<b>Câu ${i+1}: ${q.q}</b>`;
+q.a.forEach((x,j)=>{quizDiv.innerHTML+=`<div class="answer" onclick="choose(${j},this)">${x}</div>`;});
+document.getElementById("bar").style.width=(i/questions.length*100)+"%";}
 
-function choose(j,el){
- if(locked) return;
- locked=true;
- let ans=document.querySelectorAll(".answer");
- ans.forEach(a=>a.classList.add("disabled"));
-
- if(j===questions[i].correct){
-   el.classList.add("correct");
-   document.getElementById("ting").play();
-   score++;
- }else{
-   el.classList.add("wrong");
-   ans[questions[i].correct].classList.add("correct");
-   document.getElementById("wrong").play();
- }
-}
+function choose(j,el){selected=j; document.querySelectorAll(".answer").forEach(e=>e.classList.remove("active")); el.classList.add("active");}
 
 function next(){
- if(!locked){alert("Bạn chưa chọn đáp án!");return;}
- i++;
- if(i<questions.length){
-   load();
- }else{
-   document.getElementById("quiz").innerHTML="";
-   document.getElementById("bar").style.width="100%";
-   document.getElementById("result").innerHTML=
-     `🎉 Hoàn thành bài thi<br>Điểm: <b>${score}/${questions.length}</b>`;
-   document.getElementById("restartBtn").style.display="block";
-   document.getElementById("nextBtn").style.display="none";
- }
+    if(selected===-1){alert("Chọn đáp án!"); return;}
+    let q=questions[i]; let ans=document.querySelectorAll(".answer");
+    if(selected===q.c){ans[selected].classList.add("correct"); document.getElementById("ting").play(); score++;}
+    else{ans[selected].classList.add("wrong"); document.getElementById("wrong").play();}
+    setTimeout(()=>{
+        i++; selected=-1;
+        if(i<questions.length) loadQ();
+        else{
+            document.getElementById("quiz").innerHTML=""; document.getElementById("result").innerHTML=`🎉 Hoàn thành<br>Điểm: <b>${score}/${questions.length}</b>`;
+            document.getElementById("backStudent").classList.remove("hidden"); document.getElementById("nextBtn").classList.add("hidden");
+            document.getElementById("bar").style.width="100%";
+            saveStudentScore();
+        }
+    },600);
 }
 
-function restart(){
- i=0;
- score=0;
- document.getElementById("result").innerHTML="";
- document.getElementById("restartBtn").style.display="none";
- document.getElementById("nextBtn").style.display="block";
- load();
+function saveStudentScore(){
+    let sub=document.getElementById("subChoose").value;
+    let scores=JSON.parse(localStorage.getItem("score_"+sub)||"[]");
+    let now=new Date();
+    scores.push({name:studentName,score:score,total:questions.length,date:now.toLocaleString()});
+    localStorage.setItem("score_"+sub,JSON.stringify(scores));
+    if(localStorage.getItem("limit_"+sub)){localStorage.setItem("done_"+sub,"true");}
 }
 </script>
 </body>
