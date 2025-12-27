@@ -27,6 +27,7 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 <button onclick="openStudent()">👨‍🎓 Học sinh</button>
 </div>
 
+<!-- LOGIN -->
 <div class="box hidden" id="loginBox">
 <h3>Đăng nhập giáo viên</h3>
 <input type="password" id="pass" placeholder="Mật khẩu">
@@ -34,8 +35,9 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 <button onclick="reload()">⬅ Quay lại</button>
 </div>
 
+<!-- GIÁO VIÊN -->
 <div class="box hidden" id="teacher">
-<h3>👨‍🏫 Quản lý câu hỏi</h3>
+<h3>👨‍🏫 Quản lý</h3>
 
 <select id="subject">
 <option value="toan">Toán</option>
@@ -63,15 +65,17 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 
 <button onclick="addQ()">➕ Thêm câu hỏi</button>
 <button onclick="showQ()">📄 Xem / Xoá câu hỏi</button>
-<button onclick="showScores()">📊 Bảng điểm</button>
+<button onclick="showScores()">📊 Xem điểm</button>
+<button onclick="clearScores()">🗑 Xoá dữ liệu học sinh</button>
 <button onclick="reload()">⬅ Thoát</button>
 
 <div id="out"></div>
 </div>
 
+<!-- HỌC SINH -->
 <div class="box hidden" id="student">
 <h3>📝 Làm bài</h3>
-<input id="name" placeholder="Nhập tên">
+<input id="nameInput" placeholder="Nhập tên học sinh">
 <select id="sub">
 <option value="">-- Chọn môn --</option>
 <option value="toan">Toán</option>
@@ -82,6 +86,7 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 <option value="dia">Địa</option>
 <option value="van">Ngữ văn</option>
 </select>
+
 <button onclick="start()">Bắt đầu</button>
 
 <div id="loading" class="loading hidden">⏳ Đang tải đề...</div>
@@ -94,7 +99,7 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 const PASS="14032008";
 let list=[],i=0,score=0,selected=false;
 
-function reload(){location.reload()}
+function reload(){location.reload();}
 
 function openTeacher(){
 home.classList.add("hidden");
@@ -115,12 +120,12 @@ teacher.classList.remove("hidden");
 
 function addQ(){
 if(!q.value||!a1.value||!a2.value||!a3.value||!a4.value||correct.value==="")
-return alert("Nhập đầy đủ dữ liệu!");
+return alert("Nhập đầy đủ!");
 
 let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
 d.push({q:q.value,a:[a1.value,a2.value,a3.value,a4.value],c:+correct.value});
 localStorage.setItem(subject.value,JSON.stringify(d));
-alert("Đã thêm câu hỏi!");
+alert("Đã lưu câu hỏi!");
 }
 
 function showQ(){
@@ -139,9 +144,19 @@ showQ();
 }
 
 function start(){
-if(!name.value||!sub.value) return alert("Nhập tên và chọn môn!");
-list=JSON.parse(localStorage.getItem(sub.value)||"[]");
-if(!list.length) return alert("Chưa có câu hỏi!");
+let name = nameInput.value.trim();
+let mon = sub.value;
+
+if(name=="" || mon==""){
+alert("Vui lòng nhập tên và chọn môn!");
+return;
+}
+
+list = JSON.parse(localStorage.getItem(mon) || "[]");
+if(list.length==0){
+alert("Môn này chưa có câu hỏi!");
+return;
+}
 
 loading.classList.remove("hidden");
 setTimeout(()=>{
@@ -176,7 +191,12 @@ else finish();
 
 function finish(){
 let arr=JSON.parse(localStorage.getItem("scores")||"[]");
-arr.push({name:name.value,mon:sub.value,score:score,date:new Date().toLocaleString()});
+arr.push({
+name:nameInput.value.trim(),
+mon:sub.value,
+score:score,
+date:new Date().toLocaleString()
+});
 localStorage.setItem("scores",JSON.stringify(arr));
 result.innerHTML=`🎉 Hoàn thành<br>Điểm: ${score}/${list.length}`;
 }
@@ -186,6 +206,14 @@ let s=JSON.parse(localStorage.getItem("scores")||"[]");
 out.innerHTML="<table><tr><th>Tên</th><th>Môn</th><th>Điểm</th><th>Ngày</th></tr>"+
 s.map(x=>`<tr><td>${x.name}</td><td>${x.mon}</td><td>${x.score}</td><td>${x.date}</td></tr>`).join("")+
 "</table>";
+}
+
+function clearScores(){
+if(confirm("Xoá toàn bộ dữ liệu học sinh?")){
+localStorage.removeItem("scores");
+alert("Đã xoá dữ liệu!");
+out.innerHTML="";
+}
 }
 </script>
 </body>
