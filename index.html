@@ -15,6 +15,7 @@ input,select,textarea{width:100%;padding:8px;margin:5px 0}
 .wrong{background:#e53935;color:white}
 .progress{height:8px;background:#ddd;border-radius:10px;margin:10px 0}
 .bar{height:100%;width:0;background:#2196f3}
+.loading{font-size:18px;text-align:center;color:#1e88e5}
 table{width:100%;border-collapse:collapse}
 th,td{border:1px solid #ccc;padding:6px;text-align:center}
 </style>
@@ -39,7 +40,7 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 
 <!-- GIÁO VIÊN -->
 <div class="box hidden" id="teacher">
-<h3>📘 Quản lý</h3>
+<h3>📘 Quản lý câu hỏi</h3>
 
 <select id="subject">
 <option value="toan">Toán</option>
@@ -58,6 +59,7 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 <input id="a4" placeholder="Đáp án D">
 
 <select id="correct">
+<option value="">-- Chọn đáp án đúng --</option>
 <option value="0">Đúng A</option>
 <option value="1">Đúng B</option>
 <option value="2">Đúng C</option>
@@ -76,8 +78,9 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 <!-- HỌC SINH -->
 <div class="box hidden" id="student">
 <h3>📝 Làm bài</h3>
-<input id="name" placeholder="Nhập tên">
+<input id="name" placeholder="Nhập tên học sinh">
 <select id="sub">
+<option value="">-- Chọn môn --</option>
 <option value="toan">Toán</option>
 <option value="ly">Vật lý</option>
 <option value="hoa">Hóa</option>
@@ -87,6 +90,8 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 <option value="van">Ngữ văn</option>
 </select>
 <button onclick="start()">Bắt đầu</button>
+
+<div id="loading" class="loading hidden">⏳ Đang tải đề thi...</div>
 
 <div class="progress"><div class="bar" id="bar"></div></div>
 <div id="quiz"></div>
@@ -107,51 +112,41 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 const PASS="14032008";
 let list=[],i=0,score=0,selected=false;
 
-const home=document.getElementById("home");
-const loginBox=document.getElementById("login");
-const teacherBox=document.getElementById("teacher");
-const studentBox=document.getElementById("student");
-const supportBox=document.getElementById("support");
-
-function openTeacher(){home.classList.add("hidden");loginBox.classList.remove("hidden");}
-function openStudent(){home.classList.add("hidden");studentBox.classList.remove("hidden");}
-function openSupport(){home.classList.add("hidden");supportBox.classList.remove("hidden");}
+function openTeacher(){home.classList.add("hidden");login.classList.remove("hidden");}
+function openStudent(){home.classList.add("hidden");student.classList.remove("hidden");}
+function openSupport(){home.classList.add("hidden");support.classList.remove("hidden");}
 function back(){location.reload();}
 
 function login(){
 if(pass.value===PASS){
-loginBox.classList.add("hidden");
-teacherBox.classList.remove("hidden");
+login.classList.add("hidden");
+teacher.classList.remove("hidden");
 }else alert("Sai mật khẩu!");
 }
 
 function addQ(){
+if(!q.value||!a1.value||!a2.value||!a3.value||!a4.value||correct.value==="")
+return alert("⚠ Vui lòng nhập đầy đủ câu hỏi & đáp án!");
+
 let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
 d.push({q:q.value,a:[a1.value,a2.value,a3.value,a4.value],c:+correct.value});
 localStorage.setItem(subject.value,JSON.stringify(d));
-alert("Đã thêm câu hỏi");
-}
-
-function showQ(){
-let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
-output.innerHTML=d.map((x,i)=>`
-<div>${i+1}. ${x.q}
-<button onclick="delQ(${i})">❌</button></div>`).join("");
-}
-
-function delQ(i){
-let d=JSON.parse(localStorage.getItem(subject.value));
-d.splice(i,1);
-localStorage.setItem(subject.value,JSON.stringify(d));
-showQ();
+alert("✅ Đã thêm câu hỏi");
 }
 
 function start(){
-if(name.value=="") return alert("Nhập tên!");
+if(name.value.trim()=="") return alert("⚠ Vui lòng nhập tên!");
+if(sub.value=="") return alert("⚠ Chọn môn!");
+
 list=JSON.parse(localStorage.getItem(sub.value)||"[]");
-if(!list.length) return alert("Chưa có câu hỏi!");
+if(!list.length) return alert("⚠ Môn này chưa có câu hỏi!");
+
+document.getElementById("loading").classList.remove("hidden");
+setTimeout(()=>{
+document.getElementById("loading").classList.add("hidden");
 i=0;score=0;
 load();
+},1500);
 }
 
 function load(){
@@ -180,39 +175,10 @@ else finish();
 
 function finish(){
 let data=JSON.parse(localStorage.getItem("scores")||"[]");
-data.push({
-name:name.value,
-subject:sub.value,
-score:score+"/"+list.length,
-time:new Date().toLocaleString()
-});
+data.push({name:name.value,subject:sub.value,score:`${score}/${list.length}`,time:new Date().toLocaleString()});
 localStorage.setItem("scores",JSON.stringify(data));
 result.innerHTML=`🎉 Hoàn thành<br>Điểm: ${score}/${list.length}`;
 }
-
-function loadScores(){
-let s=JSON.parse(localStorage.getItem("scores")||"[]");
-output.innerHTML="<table><tr><th>Tên</th><th>Môn</th><th>Điểm</th><th>Thời gian</th></tr>"
-+s.map(x=>`<tr><td>${x.name}</td><td>${x.subject}</td><td>${x.score}</td><td>${x.time}</td></tr>`).join("")
-+"</table>";
-}
-
-function sendSupport(){
-let s=JSON.parse(localStorage.getItem("support")||"[]");
-s.push({name:sp_name.value,msg:sp_msg.value,time:new Date().toLocaleString()});
-localStorage.setItem("support",JSON.stringify(s));
-alert("Đã gửi!");
-}
-
-function loadSupport(){
-let s=JSON.parse(localStorage.getItem("support")||"[]");
-output.innerHTML="<h3>Tin nhắn hỗ trợ</h3>"+s.map(x=>`
-<p><b>${x.name}</b> (${x.time})<br>${x.msg}</p>`).join("");
-}
-
-document.addEventListener("visibilitychange",()=>{
-if(document.hidden) alert("⚠ Không được thoát tab khi làm bài!");
-});
 </script>
 </body>
 </html>
