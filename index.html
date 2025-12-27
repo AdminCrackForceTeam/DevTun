@@ -4,13 +4,11 @@
 <meta charset="UTF-8">
 <title>Hệ Thống Thi Online</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
 body{
     margin:0;
     font-family:Arial;
     background:linear-gradient(135deg,#2196f3,#00bcd4);
-    overflow-x:hidden;
 }
 .box{
     max-width:900px;
@@ -29,7 +27,6 @@ button{
     border-radius:6px;
     background:#1976d2;
     color:#fff;
-    font-size:16px;
 }
 input,select{
     width:100%;
@@ -38,43 +35,28 @@ input,select{
 }
 .answer{
     border:1px solid #ccc;
-    padding:10px;
+    padding:8px;
     margin:5px 0;
     border-radius:6px;
-    cursor:pointer;
 }
-.correct{background:#4caf50;color:#fff}
-.wrong{background:#f44336;color:#fff}
-table{width:100%;border-collapse:collapse}
-td,th{border:1px solid #ccc;padding:6px;text-align:center}
-
-/* nút thoát */
-#backBtn{
+.correct{background:#4caf50;color:white}
+.wrong{background:#f44336;color:white}
+#menuBtn{
     position:fixed;
     top:10px;
     right:10px;
     background:#e53935;
-    color:#fff;
     padding:10px 15px;
+    color:white;
     border-radius:8px;
-    font-weight:bold;
     z-index:9999;
-}
-#backBtn:hover{opacity:.8}
-
-#snow{
-    position:fixed;
-    top:0;left:0;
-    width:100%;height:100%;
-    pointer-events:none;
 }
 </style>
 </head>
 
 <body>
 
-<button id="backBtn" onclick="goHome()">🏠 Menu</button>
-<canvas id="snow"></canvas>
+<button id="menuBtn" onclick="goHome()">🏠 Menu</button>
 
 <div class="box" id="home">
 <h2>🎓 HỆ THỐNG THI ONLINE</h2>
@@ -89,16 +71,16 @@ td,th{border:1px solid #ccc;padding:6px;text-align:center}
 </div>
 
 <div class="box hidden" id="teacher">
-<h3>👨‍🏫 Quản lý</h3>
+<h3>👨‍🏫 Quản lý câu hỏi</h3>
 
 <select id="subject">
 <option value="toan">Toán</option>
-<option value="ly">Vật lý</option>
+<option value="ly">Lý</option>
 <option value="hoa">Hóa</option>
 <option value="sinh">Sinh</option>
 <option value="su">Sử</option>
 <option value="dia">Địa</option>
-<option value="van">Ngữ văn</option>
+<option value="van">Văn</option>
 </select>
 
 <input id="q" placeholder="Câu hỏi">
@@ -125,7 +107,6 @@ td,th{border:1px solid #ccc;padding:6px;text-align:center}
 
 <div class="box hidden" id="student">
 <h3>📝 Làm bài</h3>
-
 <input id="nameInput" placeholder="Nhập tên">
 <select id="sub">
 <option value="">-- Chọn môn --</option>
@@ -139,9 +120,6 @@ td,th{border:1px solid #ccc;padding:6px;text-align:center}
 </select>
 
 <button onclick="start()">Bắt đầu</button>
-<div id="online"></div>
-<div id="loading" class="hidden">⏳ Đang tải đề...</div>
-
 <div id="quiz"></div>
 <button onclick="next()">Tiếp</button>
 <div id="result"></div>
@@ -151,17 +129,23 @@ td,th{border:1px solid #ccc;padding:6px;text-align:center}
 const PASS="14032008";
 let list=[],i=0,score=0,selected=false;
 
-/* ===== CHUYỂN MÀN ===== */
+/* MENU */
 function goHome(){
 document.querySelectorAll(".box").forEach(b=>b.classList.add("hidden"));
 home.classList.remove("hidden");
 }
 
-/* ===== GIÁO VIÊN ===== */
 function openTeacher(){
 home.classList.add("hidden");
 login.classList.remove("hidden");
 }
+
+function openStudent(){
+home.classList.add("hidden");
+student.classList.remove("hidden");
+}
+
+/* LOGIN */
 function login(){
 if(pass.value===PASS){
 login.classList.add("hidden");
@@ -169,13 +153,15 @@ teacher.classList.remove("hidden");
 }else alert("Sai mật khẩu!");
 }
 
+/* GIÁO VIÊN */
 function addQ(){
 if(!q.value||!a1.value||!a2.value||!a3.value||!a4.value||correct.value==="")
 return alert("Nhập đủ dữ liệu!");
+
 let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
 d.push({q:q.value,a:[a1.value,a2.value,a3.value,a4.value],c:+correct.value});
 localStorage.setItem(subject.value,JSON.stringify(d));
-alert("Đã lưu");
+alert("Đã lưu!");
 }
 
 function showQ(){
@@ -183,6 +169,7 @@ let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
 out.innerHTML=d.map((x,i)=>`${i+1}. ${x.q}
 <button onclick="delQ(${i})">❌</button>`).join("<br>");
 }
+
 function delQ(i){
 let d=JSON.parse(localStorage.getItem(subject.value));
 d.splice(i,1);
@@ -192,7 +179,7 @@ showQ();
 
 function showScores(){
 let s=JSON.parse(localStorage.getItem("scores")||"[]");
-out.innerHTML="<table><tr><th>Tên</th><th>Môn</th><th>Điểm</th><th>Ngày</th></tr>"+
+out.innerHTML="<table border='1' width='100%'><tr><th>Tên</th><th>Môn</th><th>Điểm</th><th>Ngày</th></tr>"+
 s.map(x=>`<tr><td>${x.name}</td><td>${x.mon}</td><td>${x.score}</td><td>${x.date}</td></tr>`).join("")+"</table>";
 }
 
@@ -203,12 +190,7 @@ alert("Đã xoá!");
 }
 }
 
-/* ===== HỌC SINH ===== */
-function openStudent(){
-home.classList.add("hidden");
-student.classList.remove("hidden");
-}
-
+/* HỌC SINH */
 function start(){
 let name=nameInput.value.trim();
 if(!name||!sub.value) return alert("Nhập tên và chọn môn!");
@@ -216,12 +198,8 @@ if(!name||!sub.value) return alert("Nhập tên và chọn môn!");
 list=JSON.parse(localStorage.getItem(sub.value)||"[]");
 if(!list.length) return alert("Môn chưa có câu hỏi!");
 
-loading.classList.remove("hidden");
-setTimeout(()=>{
-loading.classList.add("hidden");
 i=0;score=0;
 load();
-},800);
 }
 
 function load(){
@@ -258,25 +236,7 @@ date:new Date().toLocaleString()
 localStorage.setItem("scores",JSON.stringify(s));
 result.innerHTML=`🎉 Hoàn thành<br>Điểm: ${score}/${list.length}`;
 }
-
-/* ===== TUYẾT RƠI ===== */
-const c=document.getElementById("snow"),ctx=c.getContext("2d");
-c.width=innerWidth;c.height=innerHeight;
-let snow=[];
-for(let i=0;i<100;i++)snow.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*3+1});
-function draw(){
-ctx.clearRect(0,0,c.width,c.height);
-ctx.fillStyle="white";
-snow.forEach(s=>{
-ctx.beginPath();
-ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-ctx.fill();
-s.y+=s.r;
-if(s.y>c.height)s.y=0;
-});
-requestAnimationFrame(draw);
-}
-draw();
 </script>
+
 </body>
 </html>
