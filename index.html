@@ -5,17 +5,26 @@
 <title>Hệ Thống Thi Online</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{font-family:Arial;background:linear-gradient(135deg,#2196f3,#00bcd4);margin:0}
-.box{max-width:900px;margin:20px auto;background:#fff;padding:20px;border-radius:10px}
+body{font-family:Arial;background:linear-gradient(135deg,#2196f3,#00bcd4);margin:0;overflow-x:hidden;position:relative;}
+.box{max-width:900px;margin:20px auto;background:#fff;padding:20px;border-radius:10px;position:relative}
 .hidden{display:none}
-button{padding:10px;margin:5px 0;width:100%;background:#1976d2;color:#fff;border:none;border-radius:6px}
+button{padding:10px;margin:5px 0;width:100%;background:#1976d2;color:#fff;border:none;border-radius:6px;cursor:pointer}
 input,select{width:100%;padding:8px;margin:5px 0}
-.answer{border:1px solid #ccc;padding:8px;margin:5px 0;border-radius:5px;cursor:pointer}
-.correct{background:#4caf50;color:#fff}
-.wrong{background:#f44336;color:#fff}
+.answer{border:1px solid #ccc;padding:8px;margin:5px 0;border-radius:5px;cursor:pointer;transition: all 0.3s;}
+.correct{background:#4caf50;color:#fff;animation:blink 0.5s ease 0s 3;}
+.wrong{background:#f44336;color:#fff;animation:shake 0.5s;}
 table{width:100%;border-collapse:collapse}
 th,td{border:1px solid #ccc;padding:6px;text-align:center}
 .loading{text-align:center;font-size:18px}
+.close-btn{position:absolute;top:10px;right:10px;background:#f44336;width:30px;height:30px;color:#fff;border:none;border-radius:50%;font-weight:bold;cursor:pointer}
+
+/* hiệu ứng */
+@keyframes blink {0%{opacity:1}50%{opacity:0.2}100%{opacity:1}}
+@keyframes shake {0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
+
+/* Tuyết rơi */
+.snowflake{position:fixed;top:-10px;color:#fff;font-size:1em;z-index:9999;user-select:none;pointer-events:none;animation:fall linear infinite;}
+@keyframes fall{0%{transform:translateY(-10px)}100%{transform:translateY(110vh)}}
 </style>
 </head>
 
@@ -29,6 +38,7 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 
 <!-- LOGIN -->
 <div class="box hidden" id="loginBox">
+<button class="close-btn" onclick="reload()">✖</button>
 <h3>Đăng nhập giáo viên</h3>
 <input type="password" id="pass" placeholder="Mật khẩu">
 <button onclick="login()">Đăng nhập</button>
@@ -37,6 +47,7 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 
 <!-- GIÁO VIÊN -->
 <div class="box hidden" id="teacher">
+<button class="close-btn" onclick="reload()">✖</button>
 <h3>👨‍🏫 Quản lý</h3>
 
 <select id="subject">
@@ -74,6 +85,7 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 
 <!-- HỌC SINH -->
 <div class="box hidden" id="student">
+<button class="close-btn" onclick="reload()">✖</button>
 <h3>📝 Làm bài</h3>
 <input id="nameInput" placeholder="Nhập tên học sinh">
 <select id="sub">
@@ -91,7 +103,10 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 
 <div id="loading" class="loading hidden">⏳ Đang tải đề...</div>
 <div id="quiz"></div>
-<button onclick="next()">Tiếp</button>
+<div style="display:flex;justify-content:space-between">
+<button onclick="prev()">⬅ Quay lại</button>
+<button onclick="next()">Tiếp ➡</button>
+</div>
 <div id="result"></div>
 </div>
 
@@ -99,104 +114,80 @@ th,td{border:1px solid #ccc;padding:6px;text-align:center}
 const PASS="14032008";
 let list=[],i=0,score=0,selected=false;
 
+// DOM elements
+const home=document.getElementById("home");
+const loginBox=document.getElementById("loginBox");
+const teacher=document.getElementById("teacher");
+const student=document.getElementById("student");
+const out=document.getElementById("out");
+const quiz=document.getElementById("quiz");
+const loading=document.getElementById("loading");
+const result=document.getElementById("result");
+const nameInput=document.getElementById("nameInput");
+const sub=document.getElementById("sub");
+const pass=document.getElementById("pass");
+const subject=document.getElementById("subject");
+const q=document.getElementById("q");
+const a1=document.getElementById("a1");
+const a2=document.getElementById("a2");
+const a3=document.getElementById("a3");
+const a4=document.getElementById("a4");
+const correct=document.getElementById("correct");
+
+// Hiệu ứng tuyết rơi
+function createSnow(){
+    const snowCount = 50;
+    for(let j=0;j<snowCount;j++){
+        let snow = document.createElement("div");
+        snow.className="snowflake";
+        snow.style.left=Math.random()*100+"%";
+        snow.style.fontSize=(Math.random()*15+10)+"px";
+        snow.style.animationDuration=(Math.random()*5+5)+"s";
+        snow.style.opacity=Math.random();
+        snow.innerHTML="❄";
+        document.body.appendChild(snow);
+    }
+}
+createSnow();
+
 function reload(){location.reload();}
-
-function openTeacher(){
-home.classList.add("hidden");
-loginBox.classList.remove("hidden");
-}
-
-function openStudent(){
-home.classList.add("hidden");
-student.classList.remove("hidden");
-}
-
-function login(){
-if(pass.value===PASS){
-loginBox.classList.add("hidden");
-teacher.classList.remove("hidden");
-}else alert("Sai mật khẩu!");
-}
-
-function addQ(){
-if(!q.value||!a1.value||!a2.value||!a3.value||!a4.value||correct.value==="")
-return alert("Nhập đầy đủ!");
-
-let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
-d.push({q:q.value,a:[a1.value,a2.value,a3.value,a4.value],c:+correct.value});
-localStorage.setItem(subject.value,JSON.stringify(d));
-alert("Đã lưu câu hỏi!");
-}
-
-function showQ(){
-let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
-out.innerHTML=d.map((x,i)=>`
-${i+1}. ${x.q}
-<button onclick="delQ(${i})">❌</button>
-`).join("<br>");
-}
-
-function delQ(i){
-let d=JSON.parse(localStorage.getItem(subject.value));
-d.splice(i,1);
-localStorage.setItem(subject.value,JSON.stringify(d));
-showQ();
-}
+function openTeacher(){home.classList.add("hidden");loginBox.classList.remove("hidden");}
+function openStudent(){home.classList.add("hidden");student.classList.remove("hidden");}
+function login(){if(pass.value===PASS){loginBox.classList.add("hidden");teacher.classList.remove("hidden");}else alert("Sai mật khẩu!");}
+function addQ(){if(!q.value||!a1.value||!a2.value||!a3.value||!a4.value||correct.value==="") return alert("Nhập đầy đủ!"); let d=JSON.parse(localStorage.getItem(subject.value)||"[]"); d.push({q:q.value,a:[a1.value,a2.value,a3.value,a4.value],c:+correct.value}); localStorage.setItem(subject.value,JSON.stringify(d)); alert("Đã lưu câu hỏi!");}
+function showQ(){let d=JSON.parse(localStorage.getItem(subject.value)||"[]"); out.innerHTML=d.map((x,i)=>`${i+1}. ${x.q} <button onclick="delQ(${i})">❌</button>`).join("<br>");}
+function delQ(i){let d=JSON.parse(localStorage.getItem(subject.value)); d.splice(i,1); localStorage.setItem(subject.value,JSON.stringify(d)); showQ();}
 
 function start(){
 let name = nameInput.value.trim();
 let mon = sub.value;
-
-if(name=="" || mon==""){
-alert("Vui lòng nhập tên và chọn môn!");
-return;
-}
-
+if(name=="" || mon==""){alert("Vui lòng nhập tên và chọn môn!"); return;}
 list = JSON.parse(localStorage.getItem(mon) || "[]");
-if(list.length==0){
-alert("Môn này chưa có câu hỏi!");
-return;
-}
-
+if(list.length==0){alert("Môn này chưa có câu hỏi!"); return;}
 loading.classList.remove("hidden");
-setTimeout(()=>{
-loading.classList.add("hidden");
-i=0;score=0;
-load();
-},1200);
+setTimeout(()=>{loading.classList.add("hidden"); i=0; score=0; load();},1200);
 }
 
 function load(){
 selected=false;
-let q=list[i];
-quiz.innerHTML=`<b>Câu ${i+1}:</b> ${q.q}`;
-q.a.forEach((x,j)=>{
-quiz.innerHTML+=`<div class="answer" onclick="choose(${j},this)">${x}</div>`;
-});
+let qObj=list[i];
+quiz.innerHTML=`<b>Câu ${i+1}/${list.length}:</b> ${qObj.q}`;
+qObj.a.forEach((x,j)=>{quiz.innerHTML+=`<div class="answer" onclick="choose(${j},this)">${x}</div>`;});
 }
 
 function choose(j,e){
 if(selected) return;
 selected=true;
-if(j===list[i].c){e.classList.add("correct");score++}
-else e.classList.add("wrong");
+if(j===list[i].c){e.classList.add("correct"); score++;}
+else{e.classList.add("wrong"); e.style.animation="shake 0.5s"; alert("⚠ Đáp án sai!");}
 }
 
-function next(){
-if(!selected) return alert("Chọn đáp án!");
-i++;
-if(i<list.length) load();
-else finish();
-}
+function next(){if(!selected) return alert("Chọn đáp án!"); i++; if(i<list.length) load(); else finish();}
+function prev(){if(i>0){i--; load();}else alert("Bạn đang ở câu đầu tiên!");}
 
 function finish(){
 let arr=JSON.parse(localStorage.getItem("scores")||"[]");
-arr.push({
-name:nameInput.value.trim(),
-mon:sub.value,
-score:score,
-date:new Date().toLocaleString()
-});
+arr.push({name:nameInput.value.trim(),mon:sub.value,score:score,date:new Date().toLocaleString()});
 localStorage.setItem("scores",JSON.stringify(arr));
 result.innerHTML=`🎉 Hoàn thành<br>Điểm: ${score}/${list.length}`;
 }
@@ -208,13 +199,7 @@ s.map(x=>`<tr><td>${x.name}</td><td>${x.mon}</td><td>${x.score}</td><td>${x.date
 "</table>";
 }
 
-function clearScores(){
-if(confirm("Xoá toàn bộ dữ liệu học sinh?")){
-localStorage.removeItem("scores");
-alert("Đã xoá dữ liệu!");
-out.innerHTML="";
-}
-}
+function clearScores(){if(confirm("Xoá toàn bộ dữ liệu học sinh?")){localStorage.removeItem("scores"); alert("Đã xoá dữ liệu!"); out.innerHTML="";}}
 </script>
 </body>
 </html>
