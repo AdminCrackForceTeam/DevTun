@@ -13,26 +13,18 @@ body{
   overflow-x:hidden;
   position:relative;
   transition:background 0.3s,color 0.3s;
-  background:linear-gradient(135deg,#6a11cb,#2575fc);
-  color:#000;
+  background:linear-gradient(135deg,#1e1e2f,#2e2e3e);
+  color:#fff;
 }
-
-/* Dark Mode */
-body.dark{background:linear-gradient(135deg,#1e1e2f,#2e2e3e);color:#fff;}
-body.dark .box{background:#2e2e3e;color:#fff;}
-body.dark .card{background:linear-gradient(135deg,#4b6584,#1e3799);}
-body.dark .progress-container{background:#555;}
-body.dark .progress-bar{background:#00b894;}
-
-/* Common */
+body.dark{background:#111;color:#fff;}
 .box{
   max-width:900px;
   margin:20px auto;
-  background:#fff;
+  background:rgba(255,255,255,0.05);
   padding:20px;
   border-radius:15px;
   position:relative;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  box-shadow:0 10px 25px rgba(0,0,0,0.5);
   transition:all 0.3s;
 }
 .hidden{display:none;}
@@ -47,13 +39,10 @@ button{
   cursor:pointer;
   font-weight:500;
   font-size:16px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.2);
+  box-shadow:0 5px 15px rgba(0,0,0,0.4);
   transition:all 0.3s;
 }
-button:hover{
-  transform:scale(1.05);
-  box-shadow:0 8px 20px rgba(0,0,0,0.4);
-}
+button:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(0,0,0,0.6);}
 input,select{
   width:100%;
   padding:10px;
@@ -69,19 +58,11 @@ input,select{
   border-radius:8px;
   cursor:pointer;
   transition:all 0.3s;
-  background:#f1f1f1;
+  background:rgba(255,255,255,0.1);
 }
-.answer:hover{background:#d0e6ff;}
-.correct{
-  background:#4caf50;
-  color:#fff;
-  animation:blink 0.5s ease 0s 3;
-}
-.wrong{
-  background:#f44336;
-  color:#fff;
-  animation:shake 0.5s;
-}
+.answer:hover{background:rgba(0,123,255,0.3);}
+.correct{background:#4caf50;color:#fff;animation:blink 0.5s ease 0s 3;}
+.wrong{background:#f44336;color:#fff;animation:shake 0.5s;}
 table{width:100%;border-collapse:collapse;margin-top:10px;}
 th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:14px;}
 .loading{text-align:center;font-size:18px;}
@@ -98,44 +79,22 @@ th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:14px;}
   font-weight:bold;
   cursor:pointer;
   z-index:10;
-  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+  box-shadow:0 5px 15px rgba(0,0,0,0.5);
   transition:all 0.3s;
 }
-.close-btn:hover{transform:scale(1.2);box-shadow:0 8px 25px rgba(0,0,0,0.5);}
+.close-btn:hover{transform:scale(1.2);box-shadow:0 8px 25px rgba(0,0,0,0.7);}
 
 /* Animations */
 @keyframes blink{0%{opacity:1}50%{opacity:0.2}100%{opacity:1}}
 @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
 
 /* Progress Bar */
-.progress-container{width:100%;background:#ddd;border-radius:5px;margin:10px 0;}
+.progress-container{width:100%;background:rgba(255,255,255,0.2);border-radius:5px;margin:10px 0;}
 .progress-bar{width:0%;height:12px;background:#4caf50;border-radius:5px;transition: width 0.3s;}
 
 /* Snow */
 .snowflake{position:fixed;top:-10px;color:#fff;font-size:1em;z-index:9999;user-select:none;pointer-events:none;animation:fall linear infinite;}
-@keyframes fall{0%{transform:translateY(-10px)}100%{transform:translateY(110vh)}}
-
-/* Menu Cards */
-.menu-cards{display:flex;justify-content:center;gap:30px;margin-top:30px;flex-wrap:wrap;}
-.card{
-  width:180px;
-  height:180px;
-  background:linear-gradient(135deg,#42a5f5,#1e88e5);
-  border-radius:20px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.3);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  color:#fff;
-  font-weight:bold;
-  font-size:20px;
-  cursor:pointer;
-  transition:all 0.3s;
-}
-.card:hover{transform:scale(1.05);box-shadow:0 12px 25px rgba(0,0,0,0.5);}
-.icon{font-size:50px;margin-bottom:10px;}
-.text{font-size:22px;}
+@keyframes fall{0%{transform:translateY(-10px)}100%{transform:translateY(110vh);}}
 
 /* Dark Mode Toggle */
 #darkToggle{
@@ -157,29 +116,18 @@ th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:14px;}
 </head>
 <body>
 
-<!-- Dark Mode Toggle -->
 <button id="darkToggle">🌙 Dark Mode</button>
 
 <!-- Audio -->
 <audio id="soundCorrect" src="https://freesound.org/data/previews/341/341695_3248244-lq.mp3"></audio>
 <audio id="soundWrong" src="https://freesound.org/data/previews/276/276020_5121236-lq.mp3"></audio>
 
-<!-- Menu Home -->
-<div class="box" id="home">
-<h2>🎓 HỆ THỐNG THI ONLINE PRO</h2>
-<div class="menu-cards">
-  <div class="card" onclick="openTeacher()"><div class="icon">👨‍🏫</div><div class="text">Giáo viên</div></div>
-  <div class="card" onclick="openStudent()"><div class="icon">👨‍🎓</div><div class="text">Học sinh</div></div>
-</div>
-</div>
-
-<!-- Login -->
-<div class="box hidden" id="loginBox">
+<!-- Teacher Login -->
+<div class="box" id="loginBox">
 <button class="close-btn" onclick="reload()">✖</button>
 <h3>Đăng nhập giáo viên</h3>
 <input type="password" id="pass" placeholder="Mật khẩu">
 <button onclick="login()">Đăng nhập</button>
-<button onclick="reload()">⬅ Quay lại</button>
 </div>
 
 <!-- Teacher -->
@@ -246,7 +194,6 @@ th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:14px;}
 // ===== Variables =====
 const PASS="14032008";
 let list=[],i=0,score=0,selected=false;
-const home=document.getElementById("home");
 const loginBox=document.getElementById("loginBox");
 const teacher=document.getElementById("teacher");
 const student=document.getElementById("student");
@@ -289,8 +236,6 @@ darkToggle.addEventListener('click',()=>{document.body.classList.toggle('dark');
 
 // ===== Functions =====
 function reload(){location.reload();}
-function openTeacher(){home.classList.add("hidden");loginBox.classList.remove("hidden");}
-function openStudent(){home.classList.add("hidden");student.classList.remove("hidden");}
 function login(){if(pass.value===PASS){loginBox.classList.add("hidden");teacher.classList.remove("hidden");}else alert("Sai mật khẩu!");}
 function addQ(){if(!q.value||!a1.value||!a2.value||!a3.value||!a4.value||correct.value==="") return alert("Nhập đầy đủ!"); let d=JSON.parse(localStorage.getItem(subject.value)||"[]"); d.push({q:q.value,a:[a1.value,a2.value,a3.value,a4.value],c:+correct.value}); localStorage.setItem(subject.value,JSON.stringify(d)); alert("Đã lưu câu hỏi!");}
 function showQ(){let d=JSON.parse(localStorage.getItem(subject.value)||"[]"); out.innerHTML=d.map((x,i)=>`${i+1}. ${x.q} <button onclick="delQ(${i})">❌</button>`).join("<br>");}
