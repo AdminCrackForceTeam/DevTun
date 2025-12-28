@@ -11,7 +11,6 @@ body{
     margin:0;
     background: linear-gradient(135deg,#2196f3,#00bcd4);
     overflow-x:hidden;
-    position:relative;
     color:#333;
 }
 .box{
@@ -144,7 +143,6 @@ th{background:#1976d2;color:#fff;}
 .text{font-size:22px;}
 </style>
 </head>
-
 <body>
 
 <!-- Audio -->
@@ -196,6 +194,16 @@ th{background:#1976d2;color:#fff;}
 <input id="a3" placeholder="Đáp án C">
 <input id="a4" placeholder="Đáp án D">
 
+<!-- Dropdown chọn đáp án đúng -->
+<select id="correct">
+<option value="">-- Chọn đáp án đúng --</option>
+<option value="0">A</option>
+<option value="1">B</option>
+<option value="2">C</option>
+<option value="3">D</option>
+</select>
+
+<!-- Nút chức năng giáo viên -->
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
 <button class="button-animate" onclick="addQ()">➕ Thêm câu hỏi</button>
 <button class="button-animate" onclick="showQ()">📄 Xem / Xoá câu hỏi</button>
@@ -203,7 +211,8 @@ th{background:#1976d2;color:#fff;}
 <button class="button-animate" onclick="clearScores()">🗑 Xoá dữ liệu học sinh</button>
 <button class="button-animate" onclick="reload()">🏠 Thoát</button>
 </div>
-<div id="out"></div>
+
+<div id="out" style="margin-top:10px;"></div>
 </div>
 
 <!-- HỌC SINH -->
