@@ -34,11 +34,11 @@ input,select{
     font-size:16px;
 }
 
-/* Nút nổi bật nâng cấp */
+/* Nút nổi bật, mượt */
 button{
     cursor:pointer;
     outline:none;
-    transition: all 0.2s ease-out;
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
 }
 .button-animate{
     background: linear-gradient(45deg,#42a5f5,#1e88e5);
@@ -65,12 +65,22 @@ button{
     margin:8px 0;
     border-radius:8px;
     cursor:pointer;
-    transition:all 0.2s;
+    transition:all 0.25s ease-out;
     font-size:16px;
 }
 .answer:hover{background:#e3f2fd;}
-.correct{background:#4caf50;color:#fff;animation:blink 0.5s ease 0s 3;}
-.wrong{background:#f44336;color:#fff;animation:shake 0.5s;}
+.correct{
+    background:#4caf50 !important;
+    color:#fff !important;
+    font-weight:bold;
+    transform:scale(1.1);
+}
+.wrong{
+    background:#f44336 !important;
+    color:#fff !important;
+    font-weight:bold;
+    transform:scale(1.1);
+}
 
 table{width:100%;border-collapse:collapse;margin-top:15px;}
 th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:15px;}
@@ -91,20 +101,16 @@ th{background:#1976d2;color:#fff;}
     cursor:pointer;
     font-size:18px;
     z-index:10;
-    transition:all 0.2s;
+    transition: all 0.2s;
 }
 .close-btn:hover{
     background:#d32f2f;
     transform:scale(1.1);
 }
 
-/* hiệu ứng */
-@keyframes blink {0%{opacity:1}50%{opacity:0.2}100%{opacity:1}}
-@keyframes shake {0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
-
 /* Progress bar */
 .progress-container{width:100%;background:#ddd;border-radius:10px;margin:15px 0;height:15px;}
-.progress-bar{width:0%;height:100%;background:#4caf50;border-radius:10px;transition: width 0.2s;}
+.progress-bar{width:0%;height:100%;background:#4caf50;border-radius:10px;transition: width 0.15s ease-out;}
 
 /* Menu card */
 .menu-cards{
@@ -128,7 +134,7 @@ th{background:#1976d2;color:#fff;}
   font-weight:bold;
   font-size:20px;
   cursor:pointer;
-  transition:all 0.3s;
+  transition: all 0.2s ease-out;
 }
 .card:hover{
   transform:scale(1.05);
@@ -190,14 +196,6 @@ th{background:#1976d2;color:#fff;}
 <input id="a3" placeholder="Đáp án C">
 <input id="a4" placeholder="Đáp án D">
 
-<select id="correct">
-<option value="">-- Đáp án đúng --</option>
-<option value="0">A</option>
-<option value="1">B</option>
-<option value="2">C</option>
-<option value="3">D</option>
-</select>
-
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
 <button class="button-animate" onclick="addQ()">➕ Thêm câu hỏi</button>
 <button class="button-animate" onclick="showQ()">📄 Xem / Xoá câu hỏi</button>
@@ -244,7 +242,6 @@ th{background:#1976d2;color:#fff;}
 const PASS="14032008";
 let list=[],i=0,score=0,selected=false,wrong=0;
 
-// DOM
 const home=document.getElementById("home");
 const loginBox=document.getElementById("loginBox");
 const teacher=document.getElementById("teacher");
@@ -268,7 +265,6 @@ const progressBar=document.getElementById("progressBar");
 const soundCorrect=document.getElementById("soundCorrect");
 const soundWrong=document.getElementById("soundWrong");
 
-// Functions
 function reload(){location.reload();}
 function openTeacher(){home.classList.add("hidden");loginBox.classList.remove("hidden");}
 function openStudent(){home.classList.add("hidden");student.classList.remove("hidden");}
@@ -315,7 +311,7 @@ function start(){
         load(); 
         updateProgress();
         result.innerHTML="";
-    },800);
+    },200);
 }
 
 function load(){
@@ -334,11 +330,11 @@ function choose(j,e){
     const answers=document.querySelectorAll(".answer");
     if(j===list[i].c){
         e.classList.add("correct");
-        soundCorrect.play();
+        soundCorrect.play().catch(()=>{}); 
         score++;
     } else {
         e.classList.add("wrong");
-        soundWrong.play();
+        soundWrong.play().catch(()=>{});
         wrong++;
     }
     answers[list[i].c].classList.add("correct");
