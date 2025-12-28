@@ -28,7 +28,7 @@ body{
 input,select{
     width:100%;
     padding:10px;
-    margin:6px 0;
+    margin:8px 0;
     border-radius:6px;
     border:1px solid #ccc;
     font-size:16px;
@@ -38,6 +38,7 @@ input,select{
 button{
     cursor:pointer;
     outline:none;
+    transition: all 0.2s ease-out;
 }
 .button-animate{
     background: linear-gradient(45deg,#42a5f5,#1e88e5);
@@ -47,7 +48,6 @@ button{
     border-radius:10px;
     padding:12px;
     font-size:17px;
-    transition: all 0.3s;
     box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 .button-animate:hover{
@@ -56,12 +56,7 @@ button{
     box-shadow:0 8px 20px rgba(0,0,0,0.3);
 }
 .button-animate:active{
-    animation:btnClick 0.2s;
-}
-@keyframes btnClick{
-    0%{transform:scale(1.05);}
-    50%{transform:scale(0.95);}
-    100%{transform:scale(1);}
+    transform:scale(0.97);
 }
 
 .answer{
@@ -70,7 +65,7 @@ button{
     margin:8px 0;
     border-radius:8px;
     cursor:pointer;
-    transition:all 0.3s;
+    transition:all 0.2s;
     font-size:16px;
 }
 .answer:hover{background:#e3f2fd;}
@@ -87,8 +82,8 @@ th{background:#1976d2;color:#fff;}
     top:10px;
     right:10px;
     background:#f44336;
-    width:35px;
-    height:35px;
+    width:40px;
+    height:40px;
     color:#fff;
     border:none;
     border-radius:50%;
@@ -109,17 +104,13 @@ th{background:#1976d2;color:#fff;}
 
 /* Progress bar */
 .progress-container{width:100%;background:#ddd;border-radius:10px;margin:15px 0;height:15px;}
-.progress-bar{width:0%;height:100%;background:#4caf50;border-radius:10px;transition: width 0.3s;}
-
-/* Tuyết rơi */
-.snowflake{position:fixed;top:-10px;color:#fff;font-size:1em;z-index:9999;user-select:none;pointer-events:none;animation:fall linear infinite;}
-@keyframes fall{0%{transform:translateY(-10px)}100%{transform:translateY(110vh)}}
+.progress-bar{width:0%;height:100%;background:#4caf50;border-radius:10px;transition: width 0.2s;}
 
 /* Menu card */
 .menu-cards{
   display:flex;
   justify-content:center;
-  gap:30px;
+  gap:25px;
   margin-top:30px;
   flex-wrap:wrap;
 }
@@ -207,12 +198,13 @@ th{background:#1976d2;color:#fff;}
 <option value="3">D</option>
 </select>
 
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
 <button class="button-animate" onclick="addQ()">➕ Thêm câu hỏi</button>
 <button class="button-animate" onclick="showQ()">📄 Xem / Xoá câu hỏi</button>
 <button class="button-animate" onclick="showScores()">📊 Xem điểm</button>
 <button class="button-animate" onclick="clearScores()">🗑 Xoá dữ liệu học sinh</button>
-<button class="button-animate" onclick="reload()">🏠 Quay về trang chủ</button>
-
+<button class="button-animate" onclick="reload()">🏠 Thoát</button>
+</div>
 <div id="out"></div>
 </div>
 
@@ -232,8 +224,11 @@ th{background:#1976d2;color:#fff;}
 <option value="van">Ngữ văn</option>
 </select>
 
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
 <button class="button-animate" onclick="start()">Bắt đầu</button>
-<button class="button-animate" onclick="reload()">🏠 Quay về trang chủ</button>
+<button class="button-animate" onclick="resetQuiz()">🔄 Reset bài</button>
+<button class="button-animate" onclick="reload()">🏠 Thoát</button>
+</div>
 
 <div id="loading" class="loading hidden">⏳ Đang tải đề...</div>
 <div id="quiz"></div>
@@ -247,7 +242,7 @@ th{background:#1976d2;color:#fff;}
 
 <script>
 const PASS="14032008";
-let list=[],i=0,score=0,selected=false;
+let list=[],i=0,score=0,selected=false,wrong=0;
 
 // DOM
 const home=document.getElementById("home");
@@ -273,21 +268,6 @@ const progressBar=document.getElementById("progressBar");
 const soundCorrect=document.getElementById("soundCorrect");
 const soundWrong=document.getElementById("soundWrong");
 
-// Tuyết rơi
-function createSnow(){
-    for(let j=0;j<50;j++){
-        let snow=document.createElement("div");
-        snow.className="snowflake";
-        snow.style.left=Math.random()*100+"%";
-        snow.style.fontSize=(Math.random()*15+10)+"px";
-        snow.style.animationDuration=(Math.random()*5+5)+"s";
-        snow.style.opacity=Math.random();
-        snow.innerHTML="❄";
-        document.body.appendChild(snow);
-    }
-}
-createSnow();
-
 // Functions
 function reload(){location.reload();}
 function openTeacher(){home.classList.add("hidden");loginBox.classList.remove("hidden");}
@@ -297,11 +277,7 @@ function login(){
         pass.value = "";
         loginBox.classList.add("hidden");
         teacher.classList.remove("hidden");
-    } else {
-        alert("Sai mật khẩu!");
-        pass.value = "";
-        pass.focus();
-    }
+    } else {alert("Sai mật khẩu!"); pass.value=""; pass.focus();}
 }
 
 function addQ(){
@@ -335,10 +311,11 @@ function start(){
     loading.classList.remove("hidden");
     setTimeout(()=>{
         loading.classList.add("hidden"); 
-        i=0; score=0; 
+        i=0; score=0; wrong=0;
         load(); 
         updateProgress();
-    },1200);
+        result.innerHTML="";
+    },800);
 }
 
 function load(){
@@ -362,8 +339,8 @@ function choose(j,e){
     } else {
         e.classList.add("wrong");
         soundWrong.play();
+        wrong++;
     }
-    // Hiển thị đáp án đúng
     answers[list[i].c].classList.add("correct");
 }
 
@@ -381,7 +358,7 @@ function finish(){
     let arr=JSON.parse(localStorage.getItem("scores")||"[]");
     arr.push({name:nameInput.value.trim(),mon:sub.value,score:score,date:new Date().toLocaleString()});
     localStorage.setItem("scores",JSON.stringify(arr));
-    result.innerHTML=`🎉 Hoàn thành<br>Điểm: ${score}/${list.length}`;
+    result.innerHTML=`🎉 Hoàn thành!<br>✅ Đúng: ${score} <br>❌ Sai: ${wrong}`;
 }
 
 function showScores(){
@@ -394,6 +371,15 @@ function clearScores(){
         localStorage.removeItem("scores");
         alert("Đã xoá dữ liệu!");
         out.innerHTML="";
+    }
+}
+
+function resetQuiz(){
+    if(confirm("Bạn có muốn reset bài làm?")){
+        i=0; score=0; wrong=0; selected=false;
+        result.innerHTML=""; quiz.innerHTML="";
+        progressBar.style.width="0%";
+        nameInput.value=""; sub.value="";
     }
 }
 
