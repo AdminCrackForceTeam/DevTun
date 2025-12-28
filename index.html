@@ -32,8 +32,6 @@ input,select{
     border:1px solid #ccc;
     font-size:16px;
 }
-
-/* Nút nổi bật, mượt */
 button{
     cursor:pointer;
     outline:none;
@@ -57,7 +55,6 @@ button{
 .button-animate:active{
     transform:scale(0.97);
 }
-
 .answer{
     border:1px solid #ccc;
     padding:10px;
@@ -80,11 +77,9 @@ button{
     font-weight:bold;
     transform:scale(1.1);
 }
-
 table{width:100%;border-collapse:collapse;margin-top:15px;}
 th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:15px;}
 th{background:#1976d2;color:#fff;}
-
 .loading{text-align:center;font-size:18px;font-weight:500;}
 .close-btn{
     position:absolute;
@@ -102,50 +97,26 @@ th{background:#1976d2;color:#fff;}
     z-index:10;
     transition: all 0.2s;
 }
-.close-btn:hover{
-    background:#d32f2f;
-    transform:scale(1.1);
-}
-
-/* Progress bar */
+.close-btn:hover{background:#d32f2f;transform:scale(1.1);}
 .progress-container{width:100%;background:#ddd;border-radius:10px;margin:15px 0;height:15px;}
 .progress-bar{width:0%;height:100%;background:#4caf50;border-radius:10px;transition: width 0.15s ease-out;}
-
-/* Menu card */
-.menu-cards{
-  display:flex;
-  justify-content:center;
-  gap:25px;
-  margin-top:30px;
-  flex-wrap:wrap;
-}
+.menu-cards{display:flex;justify-content:center;gap:25px;margin-top:30px;flex-wrap:wrap;}
 .card{
   width:180px;
   height:180px;
   background:linear-gradient(135deg,#42a5f5,#1e88e5);
   border-radius:20px;
   box-shadow:0 8px 20px rgba(0,0,0,0.3);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  color:#fff;
-  font-weight:bold;
-  font-size:20px;
-  cursor:pointer;
-  transition: all 0.2s ease-out;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  color:#fff;font-weight:bold;font-size:20px;cursor:pointer;transition: all 0.2s ease-out;
 }
-.card:hover{
-  transform:scale(1.05);
-  box-shadow:0 12px 25px rgba(0,0,0,0.5);
-}
+.card:hover{transform:scale(1.05);box-shadow:0 12px 25px rgba(0,0,0,0.5);}
 .icon{font-size:50px;margin-bottom:10px;}
 .text{font-size:22px;}
 </style>
 </head>
 <body>
 
-<!-- Audio -->
 <audio id="soundCorrect" src="https://freesound.org/data/previews/341/341695_3248244-lq.mp3"></audio>
 <audio id="soundWrong" src="https://freesound.org/data/previews/276/276020_5121236-lq.mp3"></audio>
 
@@ -177,7 +148,6 @@ th{background:#1976d2;color:#fff;}
 <div class="box hidden" id="teacher">
 <button class="close-btn" onclick="reload()">✖</button>
 <h3>👨‍🏫 Quản lý</h3>
-
 <select id="subject">
 <option value="toan">Toán</option>
 <option value="ly">Vật lý</option>
@@ -187,14 +157,11 @@ th{background:#1976d2;color:#fff;}
 <option value="dia">Địa</option>
 <option value="van">Ngữ văn</option>
 </select>
-
 <input id="q" placeholder="Câu hỏi">
 <input id="a1" placeholder="Đáp án A">
 <input id="a2" placeholder="Đáp án B">
 <input id="a3" placeholder="Đáp án C">
 <input id="a4" placeholder="Đáp án D">
-
-<!-- Dropdown chọn đáp án đúng -->
 <select id="correct">
 <option value="">-- Chọn đáp án đúng --</option>
 <option value="0">A</option>
@@ -202,8 +169,6 @@ th{background:#1976d2;color:#fff;}
 <option value="2">C</option>
 <option value="3">D</option>
 </select>
-
-<!-- Nút chức năng giáo viên -->
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
 <button class="button-animate" onclick="addQ()">➕ Thêm câu hỏi</button>
 <button class="button-animate" onclick="showQ()">📄 Xem / Xoá câu hỏi</button>
@@ -211,7 +176,6 @@ th{background:#1976d2;color:#fff;}
 <button class="button-animate" onclick="clearScores()">🗑 Xoá dữ liệu học sinh</button>
 <button class="button-animate" onclick="reload()">🏠 Thoát</button>
 </div>
-
 <div id="out" style="margin-top:10px;"></div>
 </div>
 
@@ -230,13 +194,11 @@ th{background:#1976d2;color:#fff;}
 <option value="dia">Địa</option>
 <option value="van">Ngữ văn</option>
 </select>
-
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
 <button class="button-animate" onclick="start()">Bắt đầu</button>
 <button class="button-animate" onclick="resetQuiz()">🔄 Reset bài</button>
 <button class="button-animate" onclick="reload()">🏠 Thoát</button>
 </div>
-
 <div id="loading" class="loading hidden">⏳ Đang tải đề...</div>
 <div id="quiz"></div>
 <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
@@ -250,7 +212,6 @@ th{background:#1976d2;color:#fff;}
 <script>
 const PASS="14032008";
 let list=[],i=0,score=0,selected=false,wrong=0;
-
 const home=document.getElementById("home");
 const loginBox=document.getElementById("loginBox");
 const teacher=document.getElementById("teacher");
@@ -270,7 +231,6 @@ const a3=document.getElementById("a3");
 const a4=document.getElementById("a4");
 const correct=document.getElementById("correct");
 const progressBar=document.getElementById("progressBar");
-
 const soundCorrect=document.getElementById("soundCorrect");
 const soundWrong=document.getElementById("soundWrong");
 
@@ -279,9 +239,7 @@ function openTeacher(){home.classList.add("hidden");loginBox.classList.remove("h
 function openStudent(){home.classList.add("hidden");student.classList.remove("hidden");}
 function login(){
     if(pass.value === PASS){
-        pass.value = "";
-        loginBox.classList.add("hidden");
-        teacher.classList.remove("hidden");
+        pass.value="";loginBox.classList.add("hidden");teacher.classList.remove("hidden");
     } else {alert("Sai mật khẩu!"); pass.value=""; pass.focus();}
 }
 
@@ -290,46 +248,35 @@ function addQ(){
     let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
     d.push({q:q.value,a:[a1.value,a2.value,a3.value,a4.value],c:+correct.value});
     localStorage.setItem(subject.value,JSON.stringify(d));
-    alert("Đã lưu câu hỏi!");
-    q.value=a1.value=a2.value=a3.value=a4.value="";
-    correct.value="";
+    alert("Đã lưu câu hỏi!"); q.value=a1.value=a2.value=a3.value=a4.value=""; correct.value="";
 }
 
 function showQ(){
     let d=JSON.parse(localStorage.getItem(subject.value)||"[]");
-    out.innerHTML=d.map((x,i)=>`${i+1}. ${x.q} <button class="button-animate" onclick="delQ(${i})">❌</button>`).join("<br>");
+    out.innerHTML=d.length>0?d.map((x,i)=>`${i+1}. ${x.q} <button class="button-animate" onclick="delQ(${i})">❌</button>`).join("<br>"):"Chưa có câu hỏi!";
 }
 
 function delQ(i){
     let d=JSON.parse(localStorage.getItem(subject.value));
-    d.splice(i,1);
-    localStorage.setItem(subject.value,JSON.stringify(d));
+    d.splice(i,1); localStorage.setItem(subject.value,JSON.stringify(d));
     showQ();
 }
 
 function start(){
     let name=nameInput.value.trim();
     let mon=sub.value;
-    if(name=="" || mon==""){alert("Vui lòng nhập tên và chọn môn!"); return;}
+    if(name==""||mon==""){alert("Vui lòng nhập tên và chọn môn!"); return;}
     list=JSON.parse(localStorage.getItem(mon)||"[]");
     if(list.length==0){alert("Môn này chưa có câu hỏi!"); return;}
     loading.classList.remove("hidden");
-    setTimeout(()=>{
-        loading.classList.add("hidden"); 
-        i=0; score=0; wrong=0;
-        load(); 
-        updateProgress();
-        result.innerHTML="";
-    },200);
+    setTimeout(()=>{loading.classList.add("hidden"); i=0; score=0; wrong=0; selected=false; load(); updateProgress(); result.innerHTML="";},200);
 }
 
 function load(){
     selected=false;
     let qObj=list[i];
     quiz.innerHTML=`<b>Câu ${i+1}/${list.length}:</b> ${qObj.q}`;
-    qObj.a.forEach((x,j)=>{
-        quiz.innerHTML+=`<div class="answer" onclick="choose(${j},this)">${x}</div>`;
-    });
+    qObj.a.forEach((x,j)=>{quiz.innerHTML+=`<div class="answer" onclick="choose(${j},this)">${x}</div>`;});
     updateProgress();
 }
 
@@ -337,27 +284,13 @@ function choose(j,e){
     if(selected) return;
     selected=true;
     const answers=document.querySelectorAll(".answer");
-    if(j===list[i].c){
-        e.classList.add("correct");
-        soundCorrect.play().catch(()=>{}); 
-        score++;
-    } else {
-        e.classList.add("wrong");
-        soundWrong.play().catch(()=>{});
-        wrong++;
-    }
+    if(j===list[i].c){e.classList.add("correct");score++;soundCorrect.play().catch(()=>{});}
+    else{e.classList.add("wrong");wrong++;soundWrong.play().catch(()=>{});}
     answers[list[i].c].classList.add("correct");
 }
 
-function next(){
-    if(!selected) return alert("Chọn đáp án!");
-    i++; 
-    if(i<list.length) load(); else finish();
-}
-
-function prev(){
-    if(i>0){i--; load();}else alert("Bạn đang ở câu đầu tiên!");
-}
+function next(){if(!selected) return alert("Chọn đáp án!"); i++; if(i<list.length) load(); else finish();}
+function prev(){if(i>0){i--; load();}else alert("Bạn đang ở câu đầu tiên!");}
 
 function finish(){
     let arr=JSON.parse(localStorage.getItem("scores")||"[]");
@@ -368,30 +301,12 @@ function finish(){
 
 function showScores(){
     let s=JSON.parse(localStorage.getItem("scores")||"[]");
-    out.innerHTML="<table><tr><th>Tên</th><th>Môn</th><th>Điểm</th><th>Ngày</th></tr>"+s.map(x=>`<tr><td>${x.name}</td><td>${x.mon}</td><td>${x.score}</td><td>${x.date}</td></tr>`).join("")+"</table>";
+    out.innerHTML=s.length>0?"<table><tr><th>Tên</th><th>Môn</th><th>Điểm</th><th>Ngày</th></tr>"+s.map(x=>`<tr><td>${x.name}</td><td>${x.mon}</td><td>${x.score}</td><td>${x.date}</td></tr>`).join("")+"</table>":"Chưa có dữ liệu!";
 }
 
-function clearScores(){
-    if(confirm("Xoá toàn bộ dữ liệu học sinh?")){
-        localStorage.removeItem("scores");
-        alert("Đã xoá dữ liệu!");
-        out.innerHTML="";
-    }
-}
-
-function resetQuiz(){
-    if(confirm("Bạn có muốn reset bài làm?")){
-        i=0; score=0; wrong=0; selected=false;
-        result.innerHTML=""; quiz.innerHTML="";
-        progressBar.style.width="0%";
-        nameInput.value=""; sub.value="";
-    }
-}
-
-function updateProgress(){ 
-    let percent=((i+1)/list.length)*100; 
-    progressBar.style.width=percent+"%";
-}
+function clearScores(){if(confirm("Xoá toàn bộ dữ liệu học sinh?")){localStorage.removeItem("scores"); alert("Đã xoá dữ liệu!"); out.innerHTML="";}}
+function resetQuiz(){if(confirm("Bạn có muốn reset bài làm?")){i=0; score=0; wrong=0; selected=false; result.innerHTML=""; quiz.innerHTML=""; progressBar.style.width="0%"; nameInput.value=""; sub.value="";}}
+function updateProgress(){progressBar.style.width=((i+1)/list.length*100)+"%";}
 </script>
 </body>
 </html>
