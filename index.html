@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+l<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -37,11 +37,6 @@ body {
     margin: 20px;
     backdrop-filter: blur(15px);
     box-shadow: 0 10px 40px rgba(0,255,255,0.1);
-    transition: 0.4s;
-}
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 50px rgba(0,255,255,0.3);
 }
 .title { font-size: 22px; font-weight: 600; }
 .price {
@@ -50,13 +45,7 @@ body {
     margin: 15px 0;
     color: #00ffcc;
 }
-.features {
-    text-align: left;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #ccc;
-}
-.features span { display: block; }
+.features span { display: block; color: #ccc; }
 button {
     margin-top: 15px;
     width: 100%;
@@ -69,17 +58,34 @@ button {
     cursor: pointer;
 }
 .hidden { display: none; }
-.qr img {
-    width: 260px;
-    border-radius: 15px;
-    margin-top: 20px;
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: none;
 }
+
 .note {
-    margin-top: 20px;
+    margin-top: 15px;
     background: #111;
     padding: 15px;
     border-radius: 10px;
     color: #00ffcc;
+}
+
+.guide {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #aaa;
+}
+.guide b { color: #00ffcc; }
+
+.qr img {
+    width: 260px;
+    margin-top: 15px;
+    border-radius: 10px;
 }
 </style>
 </head>
@@ -88,44 +94,70 @@ button {
 
 <div class="header">PROXY PREMIUM SERVICE</div>
 
+<!-- HOME -->
 <div class="container" id="home">
 
     <div class="card">
         <div class="title">Proxy Basic</div>
         <div class="price">250.000đ</div>
         <div class="features">
-            <span>✔ Proxy VIP Antiband</span>
-            <span>✔ Dùng ổn định</span>
-            <span>✔ iPhone & Android</span>
+            <span>✔ Proxy ổn định</span>
+            <span>✔ iOS & Android</span>
         </div>
-        <button onclick="buy(250000, 'Basic')">MUA NGAY</button>
+        <button onclick="buy(250000,'Basic')">MUA NGAY</button>
     </div>
 
     <div class="card">
         <div class="title">Proxy Pro</div>
         <div class="price">500.000đ</div>
         <div class="features">
-            <span>✔ Proxy Premium</span>
             <span>✔ Tốc độ cao</span>
             <span>✔ Ưu tiên cấp nhanh</span>
         </div>
-        <button onclick="buy(500000, 'Pro')">MUA NGAY</button>
+        <button onclick="buy(500000,'Pro')">MUA NGAY</button>
     </div>
 
 </div>
 
+<!-- PAYMENT -->
 <div class="container hidden" id="pay">
-    <h2>Thanh toán</h2>
 
-    <div class="qr">
-        <img id="qrImg">
+    <h2>Nhập thông tin trước khi thanh toán</h2>
+
+    <input id="phone" placeholder="Nhập SĐT của bạn">
+    <select id="device">
+        <option value="">-- Chọn thiết bị --</option>
+        <option>IOS</option>
+        <option>ANDROID</option>
+    </select>
+
+    <button onclick="generatePayment()">TIẾP TỤC</button>
+
+    <!-- KHU THANH TOÁN -->
+    <div id="paymentBox" class="hidden">
+
+        <div class="qr">
+            <img id="qrImg">
+        </div>
+
+        <div class="note" id="noteText"></div>
+
+        <button onclick="copyText()">📋 SAO CHÉP NỘI DUNG CK</button>
+        <button onclick="done()">✅ TÔI ĐÃ CHUYỂN</button>
+
+        <div class="guide">
+⚠️ HƯỚNG DẪN:
+<br>• Chuyển đúng số tiền và nội dung
+<br>• Sai nội dung sẽ không được cấp proxy
+<br>• Sau khi chuyển bấm "ĐÃ CHUYỂN"
+<br>⏱️ Xử lý: 1–5 phút
+        </div>
+
     </div>
 
-    <div class="note" id="noteText"></div>
-
-    <button onclick="copyText()">📋 COPY</button>
-    <button onclick="done()">✅ ĐÃ CHUYỂN</button>
+    <br>
     <button onclick="back()">⬅ Quay lại</button>
+
 </div>
 
 <script>
@@ -133,15 +165,17 @@ const BANK = "MB";
 const ACCOUNT = "0359268648";
 const NAME = "PROXY";
 
-const BOT_TOKEN = "YOUR_BOT_TOKEN";
-const CHAT_ID = "YOUR_CHAT_ID";
+const BOT_TOKEN = "8646409964:AAGbyJFm6_JZkKj28bSc_uFEZVmbdXmW0q0";
+const CHAT_ID = "8580769327";
 
-let currentNote = "";
 let orderId = "";
-let currentType = "";
+let currentNote = "";
 let currentAmount = "";
+let currentType = "";
+let phone = "";
+let device = "";
 
-// random mã đơn
+// tạo mã đơn
 function generateOrder() {
     return "DH" + Math.floor(Math.random() * 999999);
 }
@@ -150,19 +184,32 @@ function buy(amount, type) {
     document.getElementById("home").classList.add("hidden");
     document.getElementById("pay").classList.remove("hidden");
 
-    orderId = generateOrder();
-    currentType = type;
     currentAmount = amount;
+    currentType = type;
+}
 
-    let shortPrice = amount === 250000 ? "250K" : "500K";
+// bước nhập info xong mới tạo QR
+function generatePayment() {
+    phone = document.getElementById("phone").value;
+    device = document.getElementById("device").value;
 
-    let note = `DH:${orderId} | ${shortPrice} | ${type} | SDT + THIETBI`;
-    currentNote = note;
+    if (!phone || !device) {
+        alert("Nhập SĐT và chọn thiết bị!");
+        return;
+    }
 
-    document.getElementById("noteText").innerText = note;
+    orderId = generateOrder();
 
-    let qr = `https://img.vietqr.io/image/${BANK}-${ACCOUNT}-compact.png?amount=${amount}&addInfo=${encodeURIComponent(note)}&accountName=${NAME}`;
+    let shortPrice = currentAmount === 250000 ? "250K" : "500K";
+
+    currentNote = `DH:${orderId} | ${shortPrice} | ${currentType} | ${phone} ${device}`;
+
+    document.getElementById("noteText").innerText = currentNote;
+
+    let qr = `https://img.vietqr.io/image/${BANK}-${ACCOUNT}-compact.png?amount=${currentAmount}&addInfo=${encodeURIComponent(currentNote)}&accountName=${NAME}`;
     document.getElementById("qrImg").src = qr;
+
+    document.getElementById("paymentBox").classList.remove("hidden");
 }
 
 function copyText() {
@@ -177,19 +224,20 @@ function done() {
         body: JSON.stringify({
             chat_id: CHAT_ID,
             text: `📦 ĐƠN MỚI
-🆔 Mã: ${orderId}
-💰 Gói: ${currentType}
-💵 Giá: ${currentAmount}
-📝 Nội dung CK: ${currentNote}`
+🆔 ${orderId}
+📱 ${phone}
+📲 ${device}
+📦 ${currentType}
+💰 ${currentAmount}
+📝 ${currentNote}`
         })
     });
 
-    alert("Đã gửi về TELE!");
+    alert("Đã gửi đơn!");
 }
 
 function back() {
-    document.getElementById("home").classList.remove("hidden");
-    document.getElementById("pay").classList.add("hidden");
+    location.reload();
 }
 </script>
 
