@@ -111,12 +111,18 @@ button:hover {
     padding: 15px;
     border-radius: 10px;
     color: #00ffcc;
+    font-size: 14px;
 }
 
 .guide {
     margin-top: 15px;
     font-size: 13px;
     color: #aaa;
+}
+
+.guide b {
+    color: #00ffcc;
+    font-size: 15px;
 }
 </style>
 </head>
@@ -125,6 +131,7 @@ button:hover {
 
 <div class="header">PROXY PREMIUM SERVICE</div>
 
+<!-- HOME -->
 <div class="container" id="home">
 
     <div class="card">
@@ -146,7 +153,7 @@ button:hover {
         <div class="price">500.000đ</div>
 
         <div class="features">
-            <span>✔ Proxy Premium Antiband </span>
+            <span>✔ Proxy Premium Antiband</span>
             <span>✔ Hạn sử dụng Vĩnh viễn</span>
             <span>✔ Hỗ trợ iPhone & Android</span>
             <span>✔ Setup nhanh trong 5 phút</span>
@@ -157,6 +164,7 @@ button:hover {
 
 </div>
 
+<!-- PAYMENT -->
 <div class="container hidden" id="pay">
     <h2>Thanh toán</h2>
 
@@ -166,16 +174,20 @@ button:hover {
 
     <div class="note" id="noteText"></div>
 
-    <button onclick="copyText()">COPY NỘI DUNG</button>
-    <button onclick="done()">TÔI ĐÃ CHUYỂN</button>
+    <button onclick="copyText()">📋 COPY NỘI DUNG</button>
+    <button onclick="done()">✅ TÔI ĐÃ CHUYỂN</button>
 
     <div class="guide">
-        Thay đổi nội dung chuyển khoản: SĐT + IPHONE hoặc ANDROID của mình để lấy Proxy✅
-        <br>Thời gian xử lý: 1–5 phút
+⚠️ BẮT BUỘC:
+<br>• Nội dung chuyển khoản phải ghi:
+<br><b>SĐT + IPHONE hoặc ANDROID</b>
+<br>Ví dụ: 0981234567 IPHONE
+<br><br>❌ Sai nội dung → KHÔNG cấp proxy
+<br>⏱️ Xử lý: 1–5 phút
     </div>
 
     <br>
-    <button onclick="back()">Quay lại</button>
+    <button onclick="back()">⬅ Quay lại</button>
 </div>
 
 <script>
@@ -183,7 +195,7 @@ const BANK = "MB";
 const ACCOUNT = "0359268648";
 const NAME = "PROXY";
 
-const BOT_TOKEN = "8646409964:AAHgGb9KUBtC6KhSxCosbyKTOUL8LIgDdCw";
+const BOT_TOKEN = "8646409964:AAGbyJFm6_JZkKj28bSc_uFEZVmbdXmW0q0";
 const CHAT_ID = "8580769327";
 
 let currentNote = "";
@@ -192,7 +204,7 @@ function buy(amount) {
     document.getElementById("home").classList.add("hidden");
     document.getElementById("pay").classList.remove("hidden");
 
-    let note = `Proxy ${amount} | SDT + IPHONE/ANDROID`;
+    let note = `Proxy ${amount} | NHAP SDT + THIETBI (VD: 098xxxxxxx IPHONE)`;
     currentNote = note;
 
     document.getElementById("noteText").innerText = note;
@@ -216,7 +228,7 @@ function done() {
         })
     });
 
-    alert("Đã gửi!");
+    alert("Đã gửi đơn!");
 }
 
 function back() {
