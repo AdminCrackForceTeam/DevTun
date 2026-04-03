@@ -14,8 +14,6 @@ body {
     color: white;
     margin: 0;
 }
-
-/* HEADER */
 .header {
     padding: 25px;
     text-align: center;
@@ -25,16 +23,12 @@ body {
     -webkit-background-clip: text;
     color: transparent;
 }
-
-/* CONTAINER */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
 }
-
-/* CARD */
 .card {
     width: 320px;
     background: rgba(255,255,255,0.04);
@@ -45,39 +39,24 @@ body {
     box-shadow: 0 10px 40px rgba(0,255,255,0.1);
     transition: 0.4s;
 }
-
 .card:hover {
     transform: translateY(-8px);
     box-shadow: 0 15px 50px rgba(0,255,255,0.3);
 }
-
-/* TITLE */
-.title {
-    font-size: 22px;
-    font-weight: 600;
-}
-
-/* PRICE */
+.title { font-size: 22px; font-weight: 600; }
 .price {
     font-size: 34px;
     font-weight: 700;
     margin: 15px 0;
     color: #00ffcc;
 }
-
-/* FEATURE */
 .features {
     text-align: left;
     font-size: 14px;
     line-height: 1.6;
     color: #ccc;
 }
-
-.features span {
-    display: block;
-}
-
-/* BUTTON */
+.features span { display: block; }
 button {
     margin-top: 15px;
     width: 100%;
@@ -88,41 +67,19 @@ button {
     color: black;
     font-weight: bold;
     cursor: pointer;
-    transition: 0.3s;
 }
-
-button:hover {
-    transform: scale(1.05);
-}
-
-/* PAYMENT */
 .hidden { display: none; }
-
 .qr img {
     width: 260px;
     border-radius: 15px;
     margin-top: 20px;
-    box-shadow: 0 0 25px rgba(0,255,255,0.4);
 }
-
 .note {
     margin-top: 20px;
     background: #111;
     padding: 15px;
     border-radius: 10px;
     color: #00ffcc;
-    font-size: 14px;
-}
-
-.guide {
-    margin-top: 15px;
-    font-size: 13px;
-    color: #aaa;
-}
-
-.guide b {
-    color: #00ffcc;
-    font-size: 15px;
 }
 </style>
 </head>
@@ -131,40 +88,32 @@ button:hover {
 
 <div class="header">PROXY PREMIUM SERVICE</div>
 
-<!-- HOME -->
 <div class="container" id="home">
 
     <div class="card">
         <div class="title">Proxy Basic</div>
         <div class="price">250.000đ</div>
-
         <div class="features">
             <span>✔ Proxy VIP Antiband</span>
-            <span>✔ Hạn sử dụng Vĩnh viễn</span>
-            <span>✔ Hỗ trợ iPhone & Android</span>
-            <span>✔ Setup nhanh trong 5 phút</span>
+            <span>✔ Dùng ổn định</span>
+            <span>✔ iPhone & Android</span>
         </div>
-
-        <button onclick="buy(250000)">MUA NGAY</button>
+        <button onclick="buy(250000, 'Basic')">MUA NGAY</button>
     </div>
 
     <div class="card">
         <div class="title">Proxy Pro</div>
         <div class="price">500.000đ</div>
-
         <div class="features">
-            <span>✔ Proxy Premium Antiband</span>
-            <span>✔ Hạn sử dụng Vĩnh viễn</span>
-            <span>✔ Hỗ trợ iPhone & Android</span>
-            <span>✔ Setup nhanh trong 5 phút</span>
+            <span>✔ Proxy Premium</span>
+            <span>✔ Tốc độ cao</span>
+            <span>✔ Ưu tiên cấp nhanh</span>
         </div>
-
-        <button onclick="buy(500000)">MUA NGAY</button>
+        <button onclick="buy(500000, 'Pro')">MUA NGAY</button>
     </div>
 
 </div>
 
-<!-- PAYMENT -->
 <div class="container hidden" id="pay">
     <h2>Thanh toán</h2>
 
@@ -174,19 +123,8 @@ button:hover {
 
     <div class="note" id="noteText"></div>
 
-    <button onclick="copyText()">📋 COPY NỘI DUNG</button>
-    <button onclick="done()">✅ TÔI ĐÃ CHUYỂN</button>
-
-    <div class="guide">
-⚠️ BẮT BUỘC:
-<br>• Nội dung chuyển khoản phải ghi:
-<br><b>SĐT + IPHONE hoặc ANDROID</b>
-<br>Ví dụ: 0981234567 IPHONE
-<br><br>❌ Sai nội dung → KHÔNG cấp proxy
-<br>⏱️ Xử lý: 1–5 phút
-    </div>
-
-    <br>
+    <button onclick="copyText()">📋 COPY</button>
+    <button onclick="done()">✅ ĐÃ CHUYỂN</button>
     <button onclick="back()">⬅ Quay lại</button>
 </div>
 
@@ -195,16 +133,30 @@ const BANK = "MB";
 const ACCOUNT = "0359268648";
 const NAME = "PROXY";
 
-const BOT_TOKEN = "8646409964:AAGbyJFm6_JZkKj28bSc_uFEZVmbdXmW0q0";
-const CHAT_ID = "8580769327";
+const BOT_TOKEN = "YOUR_BOT_TOKEN";
+const CHAT_ID = "YOUR_CHAT_ID";
 
 let currentNote = "";
+let orderId = "";
+let currentType = "";
+let currentAmount = "";
 
-function buy(amount) {
+// random mã đơn
+function generateOrder() {
+    return "DH" + Math.floor(Math.random() * 999999);
+}
+
+function buy(amount, type) {
     document.getElementById("home").classList.add("hidden");
     document.getElementById("pay").classList.remove("hidden");
 
-    let note = `Proxy ${amount} | NHAP SDT + THIETBI (VD: 098xxxxxxx IPHONE)`;
+    orderId = generateOrder();
+    currentType = type;
+    currentAmount = amount;
+
+    let shortPrice = amount === 250000 ? "250K" : "500K";
+
+    let note = `DH:${orderId} | ${shortPrice} | ${type} | SDT + THIETBI`;
     currentNote = note;
 
     document.getElementById("noteText").innerText = note;
@@ -224,11 +176,15 @@ function done() {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             chat_id: CHAT_ID,
-            text: "Đơn mới:\n" + currentNote
+            text: `📦 ĐƠN MỚI
+🆔 Mã: ${orderId}
+💰 Gói: ${currentType}
+💵 Giá: ${currentAmount}
+📝 Nội dung CK: ${currentNote}`
         })
     });
 
-    alert("Đã gửi đơn!");
+    alert("Đã gửi về TELE!");
 }
 
 function back() {
